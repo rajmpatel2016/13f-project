@@ -48,10 +48,6 @@ def test_sec():
 
 @app.get("/api/test-scraper")
 def test_scraper(cik: str = "1067983"):
-    """
-    Test the full SEC 13F scraper.
-    Default: Warren Buffett (CIK: 1067983)
-    """
     try:
         from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
         
@@ -63,22 +59,44 @@ def test_scraper(cik: str = "1067983"):
             }
         
         scraper = SEC13FScraper(data_dir="./data/13f")
-        filing = scraper.scrape_investor(cik, SUPERINVESTORS[cik])
         
-        if not filing:
-            return {"status": "error", "message": "No filing found"}
+        filings = scraper.get_cik_filings(cik, "13F-HR")
+        
+        if not filings:
+            return {
+                "status": "error", 
+                "message": "No 13F filings found",
+                "cik": cik,
+                "debug": "get_cik_filings returned empty list"
+            }
+        
+        latest = filings[0]
+        holdings = scraper.get_13f_holdings(cik, latest["accession_number"])
+        
+        if not holdings:
+            return {
+                "status": "partial",
+                "message": "Found filing but couldn't parse holdings",
+                "filing": latest,
+                "debug": "get_13f_holdings returned empty"
+            }
+        
+        total_value = sum(h.value for h in holdings)
         
         return {
             "status": "success",
-            "investor": filing.investor_name,
-            "firm": filing.firm_name,
-            "filing_date": filing.filing_date,
-            "total_value_thousands": filing.total_value,
-            "positions": len(filing.holdings),
+            "investor": SUPERINVESTORS[cik]["name"],
+            "firm": SUPERINVESTORS[cik]["firm"],
+            "filing_date": latest["filing_date"],
+            "total_value_thousands": total_value,
+            "positions": len(holdings),
             "top_5": [
                 {"ticker": h.ticker or h.cusip[:6], "value": h.value, "pct": h.pct_portfolio}
-                for h in filing.holdings[:5]
+                for h in sorted(holdings, key=lambda x: x.value, reverse=True)[:5]
             ]
         }
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
     except Exception as e:
         return {"status": "error", "message": str(e)}
