@@ -22,6 +22,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import init_db, get_session
+from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
 from database.models import (
     Superinvestor, Filing13F, Holding,
     CongressMember, CongressTrade, NetWorthReport, NetWorthAsset, NetWorthLiability
@@ -181,6 +182,70 @@ async def health_check(db: Session = Depends(get_db)):
         return {"status": "healthy", "database": "connected", "stats": stats}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+
+@app.get("/api/test-scraper")
+async def test_scraper(cik: str = Query("1067983", description="CIK to test (default: Warren Buffett)")):
+    """
+    Test the SEC 13F scraper by fetching a single investor's holdings.
+    Default: Warren Buffett (CIK: 1067983)
+    """
+    try:
+        # Check if CIK is in our tracked list
+        if cik not in SUPERINVESTORS:
+            available_ciks = [
+                {"cik": k, "name": v["name"], "firm": v["firm"]} 
+                for k, v in list(SUPERINVESTORS.items())[:10]
+            ]
+            return {
+                "status": "error",
+                "message": f"CIK {cik} not in tracked superinvestors",
+                "available_ciks_sample": available_ciks
+            }
+        
+        investor_info = SUPERINVESTORS[cik]
+        scraper = SEC13FScraper(data_dir="./data/13f")
+        
+        # Scrape the investor
+        filing = scraper.scrape_investor(cik, investor_info)
+        
+        if not filing:
+            return {
+                "status": "error",
+                "message": f"No 13F filing found for {investor_info['name']}",
+                "cik": cik
+            }
+        
+        # Return top 10 holdings
+        top_holdings = [
+            {
+                "ticker": h.ticker or h.cusip[:6],
+                "issuer": h.issuer_name,
+                "value_thousands": h.value,
+                "shares": h.shares,
+                "pct_portfolio": h.pct_portfolio
+            }
+            for h in filing.holdings[:10]
+        ]
+        
+        return {
+            "status": "success",
+            "investor": filing.investor_name,
+            "firm": filing.firm_name,
+            "cik": filing.cik,
+            "filing_date": filing.filing_date,
+            "report_date": filing.report_date,
+            "total_value_thousands": filing.total_value,
+            "total_positions": len(filing.holdings),
+            "top_10_holdings": top_holdings
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "cik": cik
+        }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

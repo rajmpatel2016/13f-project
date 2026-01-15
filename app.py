@@ -1,0 +1,84 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import requests
+
+app = FastAPI(title="InvestorInsight API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+SUPERINVESTORS = [
+    {"cik": "1067983", "name": "Warren Buffett", "firm": "Berkshire Hathaway", "value": 267000000000},
+    {"cik": "1336528", "name": "Bill Ackman", "firm": "Pershing Square", "value": 14600000000},
+    {"cik": "1649339", "name": "Michael Burry", "firm": "Scion Asset Management", "value": 55000000},
+]
+
+CONGRESS = [
+    {"bioguide_id": "P000197", "name": "Nancy Pelosi", "party": "D", "chamber": "House", "state": "CA", "trades": 42},
+    {"bioguide_id": "T000278", "name": "Tommy Tuberville", "party": "R", "chamber": "Senate", "state": "AL", "trades": 89},
+]
+
+@app.get("/")
+def root():
+    return {"name": "InvestorInsight API", "status": "online"}
+
+@app.get("/api/superinvestors")
+def get_superinvestors():
+    return SUPERINVESTORS
+
+@app.get("/api/congress/members")
+def get_congress():
+    return CONGRESS
+
+@app.get("/api/test-sec")
+def test_sec():
+    try:
+        url = "https://data.sec.gov/submissions/CIK0001067983.json"
+        headers = {"User-Agent": "InvestorInsight test@test.com"}
+        r = requests.get(url, headers=headers, timeout=10)
+        data = r.json()
+        return {"status": "ok", "name": data.get("name"), "cik": data.get("cik")}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/test-scraper")
+def test_scraper(cik: str = "1067983"):
+    """
+    Test the full SEC 13F scraper.
+    Default: Warren Buffett (CIK: 1067983)
+    """
+    try:
+        from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
+        
+        if cik not in SUPERINVESTORS:
+            return {
+                "status": "error",
+                "message": f"CIK {cik} not tracked",
+                "available": list(SUPERINVESTORS.keys())[:5]
+            }
+        
+        scraper = SEC13FScraper(data_dir="./data/13f")
+        filing = scraper.scrape_investor(cik, SUPERINVESTORS[cik])
+        
+        if not filing:
+            return {"status": "error", "message": "No filing found"}
+        
+        return {
+            "status": "success",
+            "investor": filing.investor_name,
+            "firm": filing.firm_name,
+            "filing_date": filing.filing_date,
+            "total_value_thousands": filing.total_value,
+            "positions": len(filing.holdings),
+            "top_5": [
+                {"ticker": h.ticker or h.cusip[:6], "value": h.value, "pct": h.pct_portfolio}
+                for h in filing.holdings[:5]
+            ]
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
