@@ -1,0 +1,329 @@
+{
+  "member": {
+    "name": "Scott Franklin",
+    "first_name": "Scott",
+    "last_name": "Franklin",
+    "party": "R",
+    "chamber": "House",
+    "state": "FL",
+    "district": "18",
+    "committees": [
+      "Appropriations",
+      "AI Task Force"
+    ],
+    "net_worth": "$25.6M",
+    "trades_2024": 69,
+    "volume_2024": "$5.99M"
+  },
+  "last_updated": "2026-01-15T14:49:41.595049",
+  "transactions": [
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2026-01-12",
+      "filing_date": "2026-02-18",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/99591/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2026-01-11",
+      "filing_date": "2026-01-23",
+      "ticker": "AMZN",
+      "asset_name": "AMZN - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/73189/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2026-01-06",
+      "filing_date": "2026-01-12",
+      "ticker": "AVGO",
+      "asset_name": "AVGO - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/88361/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-29",
+      "filing_date": "2026-01-04",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/95738/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-23",
+      "filing_date": "2026-01-25",
+      "ticker": "COST",
+      "asset_name": "COST - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/74921/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-21",
+      "filing_date": "2026-01-09",
+      "ticker": "AVGO",
+      "asset_name": "AVGO - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/64561/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-16",
+      "filing_date": "2026-01-30",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/87783/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-15",
+      "filing_date": "2025-12-25",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/63695/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-10",
+      "filing_date": "2025-12-31",
+      "ticker": "META",
+      "asset_name": "META - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/85025/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-12-05",
+      "filing_date": "2025-12-21",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/48626/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-11-26",
+      "filing_date": "2025-12-08",
+      "ticker": "TGT",
+      "asset_name": "TGT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/42101/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-11-22",
+      "filing_date": "2026-01-01",
+      "ticker": "AMZN",
+      "asset_name": "AMZN - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/26845/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-10-24",
+      "filing_date": "2025-12-04",
+      "ticker": "DIS",
+      "asset_name": "DIS - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/93023/"
+    },
+    {
+      "member_id": "F000472",
+      "member_name": "Scott Franklin",
+      "party": "R",
+      "chamber": "House",
+      "state": "FL",
+      "transaction_date": "2025-10-19",
+      "filing_date": "2025-11-18",
+      "ticker": "META",
+      "asset_name": "META - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "AI Task Force"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/83422/"
+    }
+  ]
+}

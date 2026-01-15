@@ -1,0 +1,252 @@
+{
+  "member": {
+    "name": "Ron Wyden",
+    "first_name": "Ron",
+    "last_name": "Wyden",
+    "party": "D",
+    "chamber": "Senate",
+    "state": "OR",
+    "district": null,
+    "committees": [
+      "Finance",
+      "Budget",
+      "Intelligence"
+    ],
+    "net_worth": "$8.9M",
+    "trades_2024": 19,
+    "volume_2024": "$2.1M"
+  },
+  "last_updated": "2026-01-15T14:49:41.606201",
+  "transactions": [
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2026-01-13",
+      "filing_date": "2026-01-19",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Joint",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/56067/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2026-01-10",
+      "filing_date": "2026-01-23",
+      "ticker": "AMD",
+      "asset_name": "AMD - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/65379/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2026-01-01",
+      "filing_date": "2026-01-23",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/93970/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-12-24",
+      "filing_date": "2026-01-15",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Joint",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/10964/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-12-13",
+      "filing_date": "2026-01-13",
+      "ticker": "AAPL",
+      "asset_name": "AAPL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/76527/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-12-11",
+      "filing_date": "2026-01-24",
+      "ticker": "PANW",
+      "asset_name": "PANW - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/78733/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-12-04",
+      "filing_date": "2026-01-12",
+      "ticker": "MSFT",
+      "asset_name": "MSFT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/29203/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-11-20",
+      "filing_date": "2025-12-22",
+      "ticker": "CRM",
+      "asset_name": "CRM - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/82185/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-10-29",
+      "filing_date": "2025-12-12",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Self",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/57743/"
+    },
+    {
+      "member_id": "W000779",
+      "member_name": "Ron Wyden",
+      "party": "D",
+      "chamber": "Senate",
+      "state": "OR",
+      "transaction_date": "2025-10-21",
+      "filing_date": "2025-11-20",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Finance",
+        "Budget",
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/70145/"
+    }
+  ]
+}

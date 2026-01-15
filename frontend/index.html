@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InvestorInsight - Track Smart Money</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f8f9fa;
+      --bg-dark: #0f172a;
+      
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      
+      --accent-teal: #0d9488;
+      --accent-teal-light: #ccfbf1;
+      --accent-green: #10b981;
+      --accent-green-light: #d1fae5;
+      --accent-red: #ef4444;
+      --accent-red-light: #fee2e2;
+      --accent-blue: #0ea5e9;
+      --accent-blue-light: #e0f2fe;
+      --accent-purple: #8b5cf6;
+      --accent-purple-light: #ede9fe;
+      
+      --party-dem: #3b82f6;
+      --party-dem-light: #dbeafe;
+      --party-rep: #ef4444;
+      --party-rep-light: #fee2e2;
+      
+      --border-color: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+      
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .animate-slide { animation: slideUp 0.25s ease-out forwards; }
+    .clickable-row { cursor: pointer; transition: background 0.15s ease; }
+    .clickable-row:hover { background: var(--bg-hover); }
+    
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const API = 'http://localhost:8000';
+
+    // ═══════════════════════════════════════════════════════════════
+    // SAMPLE DATA (fallback when API offline)
+    // ═══════════════════════════════════════════════════════════════
+    const SAMPLE = {
+      holdings: {
+        "Warren Buffett": [
+          { ticker: "AAPL", name: "Apple Inc", pct: 49.2, activity: "reduce", activityPct: 10.9, shares: 915000000, value: 156000000000 },
+          { ticker: "BAC", name: "Bank of America", pct: 10.5, activity: null, shares: 1032000000, value: 34800000000 },
+          { ticker: "AXP", name: "American Express", pct: 8.9, activity: null, shares: 151000000, value: 28400000000 },
+          { ticker: "KO", name: "Coca-Cola Co", pct: 7.8, activity: null, shares: 400000000, value: 24500000000 },
+          { ticker: "CVX", name: "Chevron Corp", pct: 5.8, activity: "reduce", activityPct: 5.5, shares: 118000000, value: 18200000000 },
+          { ticker: "OXY", name: "Occidental Petroleum", pct: 4.6, activity: "add", activityPct: 4.8, shares: 248000000, value: 14500000000 },
+        ],
+        "Michael Burry": [
+          { ticker: "BABA", name: "Alibaba Group", pct: 32.1, activity: "add", activityPct: 50.0, shares: 100000, value: 78000000 },
+          { ticker: "JD", name: "JD.com Inc", pct: 22.2, activity: "new", activityPct: 100, shares: 200000, value: 54000000 },
+          { ticker: "GOOG", name: "Alphabet Inc", pct: 17.3, activity: "reduce", activityPct: 40.0, shares: 30000, value: 42000000 },
+        ],
+        "Bill Ackman": [
+          { ticker: "BN", name: "Brookfield Corp", pct: 28.2, activity: "new", activityPct: 100, shares: 68000000, value: 3500000000 },
+          { ticker: "GOOG", name: "Alphabet Inc", pct: 25.0, activity: null, shares: 2200000, value: 3100000000 },
+          { ticker: "HLT", name: "Hilton Worldwide", pct: 22.6, activity: null, shares: 14000000, value: 2800000000 },
+        ],
+        "David Tepper": [
+          { ticker: "NVDA", name: "NVIDIA Corp", pct: 26.5, activity: "reduce", activityPct: 27.3, shares: 4000000, value: 1800000000 },
+          { ticker: "META", name: "Meta Platforms", pct: 17.6, activity: "add", activityPct: 47.1, shares: 2500000, value: 1200000000 },
+          { ticker: "MSFT", name: "Microsoft Corp", pct: 14.4, activity: null, shares: 2600000, value: 980000000 },
+        ],
+        "Seth Klarman": [
+          { ticker: "LBTYA", name: "Liberty Global", pct: 22.0, activity: "add", activityPct: 11.8, shares: 95000000, value: 1800000000 },
+          { ticker: "INTC", name: "Intel Corp", pct: 10.4, activity: "new", activityPct: 100, shares: 28000000, value: 850000000 },
+        ],
+      },
+      superinvestors: [
+        { cik: "1", name: "Capital Research", firm: "Capital Group", value: 2100000000000 },
+        { cik: "2", name: "Fidelity", firm: "FMR LLC", value: 1200000000000 },
+        { cik: "3", name: "T Rowe Price", firm: "T. Rowe Price", value: 780000000000 },
+        { cik: "1067983", name: "Warren Buffett", firm: "Berkshire Hathaway", value: 267334499000 },
+        { cik: "4", name: "Primecap Management", firm: "Primecap Management", value: 156000000000 },
+        { cik: "5", name: "Dodge & Cox", firm: "Dodge & Cox", value: 118500000000 },
+        { cik: "6", name: "First Eagle Investment", firm: "First Eagle Investment Management", value: 54800000000 },
+        { cik: "7", name: "Chris Hohn", firm: "TCI Fund Management", value: 52700000000 },
+        { cik: "8", name: "Bill & Melinda Gates Foundation", firm: "Gates Foundation Trust", value: 36600000000 },
+        { cik: "9", name: "Chase Coleman", firm: "Tiger Global Management", value: 32400000000 },
+        { cik: "10", name: "Polen Capital", firm: "Polen Capital Management", value: 30800000000 },
+        { cik: "11", name: "Terry Smith", firm: "Fundsmith", value: 19800000000 },
+        { cik: "12", name: "Christopher Davis", firm: "Davis Advisors", value: 19200000000 },
+        { cik: "13", name: "David Herro", firm: "Harris Associates", value: 18900000000 },
+        { cik: "14", name: "Duan Yongping", firm: "H&H International Investment", value: 14700000000 },
+        { cik: "1336528", name: "Bill Ackman", firm: "Pershing Square Capital", value: 14600000000 },
+        { cik: "15", name: "Stephen Mandel", firm: "Lone Pine Capital", value: 13700000000 },
+        { cik: "16", name: "Thomas Gayner", firm: "Markel Group", value: 12300000000 },
+        { cik: "17", name: "Chuck Akre", firm: "Akre Capital Management", value: 10000000000 },
+        { cik: "18", name: "John Armitage", firm: "Egerton Capital", value: 9480000000 },
+        { cik: "19", name: "Thomas Russo", firm: "Gardner Russo & Quinn", value: 9330000000 },
+        { cik: "20", name: "Carl Icahn", firm: "Icahn Capital Management", value: 9140000000 },
+        { cik: "21", name: "Daniel Loeb", firm: "Third Point", value: 8300000000 },
+        { cik: "22", name: "Jensen Investment", firm: "Jensen Investment Management", value: 8060000000 },
+        { cik: "23", name: "Sarah Ketterer", firm: "Causeway Capital Management", value: 7550000000 },
+        { cik: "24", name: "Lee Ainslie", firm: "Maverick Capital", value: 7470000000 },
+        { cik: "1656456", name: "David Tepper", firm: "Appaloosa Management", value: 7380000000 },
+        { cik: "25", name: "Bill Nygren", firm: "Oakmark Select Fund", value: 7190000000 },
+        { cik: "26", name: "AKO Capital", firm: "AKO Capital", value: 7030000000 },
+        { cik: "27", name: "Greenhaven Associates", firm: "Greenhaven Associates", value: 6580000000 },
+        { cik: "28", name: "Steven Romick", firm: "FPA Crescent Fund", value: 6280000000 },
+        { cik: "29", name: "David Abrams", firm: "Abrams Capital Management", value: 6170000000 },
+        { cik: "30", name: "Mairs & Power", firm: "Mairs & Power Growth Fund", value: 5670000000 },
+        { cik: "31", name: "AltaRock Partners", firm: "AltaRock Partners", value: 5470000000 },
+        { cik: "1061768", name: "Seth Klarman", firm: "Baupost Group", value: 4760000000 },
+        { cik: "32", name: "Howard Marks", firm: "Oaktree Capital Management", value: 4740000000 },
+        { cik: "33", name: "Glenn Greenberg", firm: "Brave Warrior Advisors", value: 4310000000 },
+        { cik: "34", name: "Donald Yacktman", firm: "Yacktman Asset Management", value: 4200000000 },
+        { cik: "35", name: "Nelson Peltz", firm: "Trian Fund Management", value: 4110000000 },
+        { cik: "36", name: "Lindsell Train", firm: "Lindsell Train", value: 4080000000 },
+        { cik: "37", name: "Ruane Cunniff", firm: "Sequoia Fund", value: 3690000000 },
+        { cik: "38", name: "Li Lu", firm: "Himalaya Capital Management", value: 3230000000 },
+        { cik: "39", name: "Leon Cooperman", firm: "Omega Advisors", value: 3200000000 },
+        { cik: "40", name: "Harry Burn", firm: "Sound Shore", value: 3030000000 },
+        { cik: "41", name: "Francois Rochon", firm: "Giverny Capital", value: 2950000000 },
+        { cik: "42", name: "Tweedy Browne", firm: "Tweedy Browne Company", value: 2900000000 },
+        { cik: "43", name: "David Einhorn", firm: "Greenlight Capital", value: 2540000000 },
+        { cik: "44", name: "Samantha McLemore", firm: "Patient Capital Management", value: 2500000000 },
+        { cik: "45", name: "Clifford Sosin", firm: "CAS Investment Partners", value: 2240000000 },
+        { cik: "46", name: "Wally Weitz", firm: "Weitz Investment Management", value: 2100000000 },
+        { cik: "47", name: "Prem Watsa", firm: "Fairfax Financial Holdings", value: 2070000000 },
+        { cik: "48", name: "Bruce Berkowitz", firm: "Fairholme Capital", value: 1240000000 },
+        { cik: "49", name: "Pat Dorsey", firm: "Dorsey Asset Management", value: 1110000000 },
+        { cik: "50", name: "David Katz", firm: "Matrix Asset Advisors", value: 1080000000 },
+        { cik: "51", name: "Mason Hawkins", firm: "Longleaf Partners", value: 960000000 },
+        { cik: "52", name: "FPA Queens Road", firm: "FPA Queens Road Small Cap Value", value: 960000000 },
+        { cik: "53", name: "Arnold Van Den Berg", firm: "Century Management", value: 890000000 },
+        { cik: "54", name: "John Rogers", firm: "Ariel Appreciation Fund", value: 884000000 },
+        { cik: "55", name: "Christopher Bloomstran", firm: "Semper Augustus", value: 801000000 },
+        { cik: "56", name: "Dennis Hong", firm: "ShawSpring Partners", value: 673000000 },
+        { cik: "57", name: "Greg Alexander", firm: "Conifer Management", value: 631000000 },
+        { cik: "58", name: "Richard Pzena", firm: "Hancock Classic Value", value: 591000000 },
+        { cik: "59", name: "David Rolfe", firm: "Wedgewood Partners", value: 548000000 },
+        { cik: "60", name: "Meridian Contrarian", firm: "Meridian Contrarian Fund", value: 547000000 },
+        { cik: "61", name: "Robert Vinall", firm: "RV Capital GmbH", value: 546000000 },
+        { cik: "62", name: "Third Avenue Management", firm: "Third Avenue Management", value: 533000000 },
+        { cik: "63", name: "Kahn Brothers Group", firm: "Kahn Brothers Group", value: 532000000 },
+        { cik: "64", name: "Robert Olstein", firm: "Olstein Capital Management", value: 530000000 },
+        { cik: "65", name: "Glenn Welling", firm: "Engaged Capital", value: 408000000 },
+        { cik: "66", name: "Josh Tarasoff", firm: "Greenlea Lane Capital", value: 343000000 },
+        { cik: "67", name: "Mohnish Pabrai", firm: "Pabrai Investments", value: 337000000 },
+        { cik: "68", name: "Norbert Lou", firm: "Punch Card Management", value: 322000000 },
+        { cik: "69", name: "Guy Spier", firm: "Aquamarine Capital", value: 317000000 },
+        { cik: "70", name: "Bill Miller", firm: "Miller Value Partners", value: 272000000 },
+        { cik: "71", name: "Bryan Lawrence", firm: "Oakcliff Capital", value: 232000000 },
+        { cik: "72", name: "Francis Chou", firm: "Chou Associates", value: 208000000 },
+        { cik: "73", name: "Tom Bancroft", firm: "Makaira Partners", value: 195000000 },
+        { cik: "74", name: "Alex Roepers", firm: "Atlantic Investment Management", value: 174000000 },
+        { cik: "75", name: "Hillman Value Fund", firm: "Hillman Value Fund", value: 101000000 },
+        { cik: "76", name: "Charles Bobrinskoy", firm: "Ariel Focus Fund", value: 75000000 },
+        { cik: "1649339", name: "Michael Burry", firm: "Scion Asset Management", value: 55000000 },
+      ],
+      politicians: [
+        { bioguide_id: "1000", name: "Tommy Tuberville", party: "R", chamber: "Senate", state: "AL", trades_count: 89 },
+        { bioguide_id: "1001", name: "Katie Britt", party: "R", chamber: "Senate", state: "AL", trades_count: 12 },
+        { bioguide_id: "1002", name: "Lisa Murkowski", party: "R", chamber: "Senate", state: "AK", trades_count: 8 },
+        { bioguide_id: "1003", name: "Dan Sullivan", party: "R", chamber: "Senate", state: "AK", trades_count: 15 },
+        { bioguide_id: "1004", name: "Kyrsten Sinema", party: "I", chamber: "Senate", state: "AZ", trades_count: 24 },
+        { bioguide_id: "1005", name: "Mark Kelly", party: "D", chamber: "Senate", state: "AZ", trades_count: 19 },
+        { bioguide_id: "1006", name: "John Boozman", party: "R", chamber: "Senate", state: "AR", trades_count: 23 },
+        { bioguide_id: "1007", name: "Tom Cotton", party: "R", chamber: "Senate", state: "AR", trades_count: 18 },
+        { bioguide_id: "1008", name: "Alex Padilla", party: "D", chamber: "Senate", state: "CA", trades_count: 11 },
+        { bioguide_id: "1009", name: "Laphonza Butler", party: "D", chamber: "Senate", state: "CA", trades_count: 5 },
+        { bioguide_id: "1010", name: "Michael Bennet", party: "D", chamber: "Senate", state: "CO", trades_count: 16 },
+        { bioguide_id: "1011", name: "John Hickenlooper", party: "D", chamber: "Senate", state: "CO", trades_count: 31 },
+        { bioguide_id: "1012", name: "Richard Blumenthal", party: "D", chamber: "Senate", state: "CT", trades_count: 13 },
+        { bioguide_id: "1013", name: "Chris Murphy", party: "D", chamber: "Senate", state: "CT", trades_count: 9 },
+        { bioguide_id: "1014", name: "Tom Carper", party: "D", chamber: "Senate", state: "DE", trades_count: 14 },
+        { bioguide_id: "1015", name: "Chris Coons", party: "D", chamber: "Senate", state: "DE", trades_count: 11 },
+        { bioguide_id: "1016", name: "Marco Rubio", party: "R", chamber: "Senate", state: "FL", trades_count: 14 },
+        { bioguide_id: "1017", name: "Rick Scott", party: "R", chamber: "Senate", state: "FL", trades_count: 67 },
+        { bioguide_id: "1018", name: "Jon Ossoff", party: "D", chamber: "Senate", state: "GA", trades_count: 24 },
+        { bioguide_id: "1019", name: "Raphael Warnock", party: "D", chamber: "Senate", state: "GA", trades_count: 17 },
+        { bioguide_id: "1020", name: "Brian Schatz", party: "D", chamber: "Senate", state: "HI", trades_count: 8 },
+        { bioguide_id: "1021", name: "Mazie Hirono", party: "D", chamber: "Senate", state: "HI", trades_count: 10 },
+        { bioguide_id: "1022", name: "Mike Crapo", party: "R", chamber: "Senate", state: "ID", trades_count: 9 },
+        { bioguide_id: "1023", name: "Jim Risch", party: "R", chamber: "Senate", state: "ID", trades_count: 11 },
+        { bioguide_id: "1024", name: "Dick Durbin", party: "D", chamber: "Senate", state: "IL", trades_count: 12 },
+        { bioguide_id: "1025", name: "Tammy Duckworth", party: "D", chamber: "Senate", state: "IL", trades_count: 15 },
+        { bioguide_id: "1026", name: "Todd Young", party: "R", chamber: "Senate", state: "IN", trades_count: 16 },
+        { bioguide_id: "1027", name: "Mike Braun", party: "R", chamber: "Senate", state: "IN", trades_count: 21 },
+        { bioguide_id: "1028", name: "Chuck Grassley", party: "R", chamber: "Senate", state: "IA", trades_count: 7 },
+        { bioguide_id: "1029", name: "Joni Ernst", party: "R", chamber: "Senate", state: "IA", trades_count: 13 },
+        { bioguide_id: "1030", name: "Jerry Moran", party: "R", chamber: "Senate", state: "KS", trades_count: 10 },
+        { bioguide_id: "1031", name: "Roger Marshall", party: "R", chamber: "Senate", state: "KS", trades_count: 19 },
+        { bioguide_id: "1032", name: "Mitch McConnell", party: "R", chamber: "Senate", state: "KY", trades_count: 24 },
+        { bioguide_id: "1033", name: "Rand Paul", party: "R", chamber: "Senate", state: "KY", trades_count: 8 },
+        { bioguide_id: "1034", name: "Bill Cassidy", party: "R", chamber: "Senate", state: "LA", trades_count: 17 },
+        { bioguide_id: "1035", name: "John Kennedy", party: "R", chamber: "Senate", state: "LA", trades_count: 22 },
+        { bioguide_id: "1036", name: "Susan Collins", party: "R", chamber: "Senate", state: "ME", trades_count: 11 },
+        { bioguide_id: "1037", name: "Angus King", party: "I", chamber: "Senate", state: "ME", trades_count: 15 },
+        { bioguide_id: "1038", name: "Ben Cardin", party: "D", chamber: "Senate", state: "MD", trades_count: 18 },
+        { bioguide_id: "1039", name: "Chris Van Hollen", party: "D", chamber: "Senate", state: "MD", trades_count: 14 },
+        { bioguide_id: "1040", name: "Elizabeth Warren", party: "D", chamber: "Senate", state: "MA", trades_count: 6 },
+        { bioguide_id: "1041", name: "Ed Markey", party: "D", chamber: "Senate", state: "MA", trades_count: 9 },
+        { bioguide_id: "1042", name: "Debbie Stabenow", party: "D", chamber: "Senate", state: "MI", trades_count: 11 },
+        { bioguide_id: "1043", name: "Gary Peters", party: "D", chamber: "Senate", state: "MI", trades_count: 21 },
+        { bioguide_id: "1044", name: "Amy Klobuchar", party: "D", chamber: "Senate", state: "MN", trades_count: 13 },
+        { bioguide_id: "1045", name: "Tina Smith", party: "D", chamber: "Senate", state: "MN", trades_count: 16 },
+        { bioguide_id: "1046", name: "Roger Wicker", party: "R", chamber: "Senate", state: "MS", trades_count: 14 },
+        { bioguide_id: "1047", name: "Cindy Hyde-Smith", party: "R", chamber: "Senate", state: "MS", trades_count: 9 },
+        { bioguide_id: "1048", name: "Josh Hawley", party: "R", chamber: "Senate", state: "MO", trades_count: 16 },
+        { bioguide_id: "1049", name: "Eric Schmitt", party: "R", chamber: "Senate", state: "MO", trades_count: 12 },
+        { bioguide_id: "1050", name: "Steve Daines", party: "R", chamber: "Senate", state: "MT", trades_count: 18 },
+        { bioguide_id: "1051", name: "Jon Tester", party: "D", chamber: "Senate", state: "MT", trades_count: 22 },
+        { bioguide_id: "1052", name: "Deb Fischer", party: "R", chamber: "Senate", state: "NE", trades_count: 8 },
+        { bioguide_id: "1053", name: "Pete Ricketts", party: "R", chamber: "Senate", state: "NE", trades_count: 25 },
+        { bioguide_id: "1054", name: "Catherine Cortez Masto", party: "D", chamber: "Senate", state: "NV", trades_count: 19 },
+        { bioguide_id: "1055", name: "Jacky Rosen", party: "D", chamber: "Senate", state: "NV", trades_count: 22 },
+        { bioguide_id: "1056", name: "Jeanne Shaheen", party: "D", chamber: "Senate", state: "NH", trades_count: 10 },
+        { bioguide_id: "1057", name: "Maggie Hassan", party: "D", chamber: "Senate", state: "NH", trades_count: 14 },
+        { bioguide_id: "1058", name: "Cory Booker", party: "D", chamber: "Senate", state: "NJ", trades_count: 8 },
+        { bioguide_id: "1059", name: "Andy Kim", party: "D", chamber: "Senate", state: "NJ", trades_count: 17 },
+        { bioguide_id: "1060", name: "Martin Heinrich", party: "D", chamber: "Senate", state: "NM", trades_count: 12 },
+        { bioguide_id: "1061", name: "Ben Ray Lujan", party: "D", chamber: "Senate", state: "NM", trades_count: 9 },
+        { bioguide_id: "1062", name: "Chuck Schumer", party: "D", chamber: "Senate", state: "NY", trades_count: 11 },
+        { bioguide_id: "1063", name: "Kirsten Gillibrand", party: "D", chamber: "Senate", state: "NY", trades_count: 15 },
+        { bioguide_id: "1064", name: "Thom Tillis", party: "R", chamber: "Senate", state: "NC", trades_count: 20 },
+        { bioguide_id: "1065", name: "Ted Budd", party: "R", chamber: "Senate", state: "NC", trades_count: 15 },
+        { bioguide_id: "1066", name: "John Hoeven", party: "R", chamber: "Senate", state: "ND", trades_count: 11 },
+        { bioguide_id: "1067", name: "Kevin Cramer", party: "R", chamber: "Senate", state: "ND", trades_count: 13 },
+        { bioguide_id: "1068", name: "Sherrod Brown", party: "D", chamber: "Senate", state: "OH", trades_count: 13 },
+        { bioguide_id: "1069", name: "J.D. Vance", party: "R", chamber: "Senate", state: "OH", trades_count: 28 },
+        { bioguide_id: "1070", name: "James Lankford", party: "R", chamber: "Senate", state: "OK", trades_count: 9 },
+        { bioguide_id: "1071", name: "Markwayne Mullin", party: "R", chamber: "Senate", state: "OK", trades_count: 45 },
+        { bioguide_id: "1072", name: "Ron Wyden", party: "D", chamber: "Senate", state: "OR", trades_count: 26 },
+        { bioguide_id: "1073", name: "Jeff Merkley", party: "D", chamber: "Senate", state: "OR", trades_count: 8 },
+        { bioguide_id: "1074", name: "Bob Casey", party: "D", chamber: "Senate", state: "PA", trades_count: 16 },
+        { bioguide_id: "1075", name: "John Fetterman", party: "D", chamber: "Senate", state: "PA", trades_count: 7 },
+        { bioguide_id: "1076", name: "Jack Reed", party: "D", chamber: "Senate", state: "RI", trades_count: 10 },
+        { bioguide_id: "1077", name: "Sheldon Whitehouse", party: "D", chamber: "Senate", state: "RI", trades_count: 18 },
+        { bioguide_id: "1078", name: "Lindsey Graham", party: "R", chamber: "Senate", state: "SC", trades_count: 12 },
+        { bioguide_id: "1079", name: "Tim Scott", party: "R", chamber: "Senate", state: "SC", trades_count: 19 },
+        { bioguide_id: "1080", name: "John Thune", party: "R", chamber: "Senate", state: "SD", trades_count: 14 },
+        { bioguide_id: "1081", name: "Mike Rounds", party: "R", chamber: "Senate", state: "SD", trades_count: 17 },
+        { bioguide_id: "1082", name: "Marsha Blackburn", party: "R", chamber: "Senate", state: "TN", trades_count: 21 },
+        { bioguide_id: "1083", name: "Bill Hagerty", party: "R", chamber: "Senate", state: "TN", trades_count: 33 },
+        { bioguide_id: "1084", name: "John Cornyn", party: "R", chamber: "Senate", state: "TX", trades_count: 16 },
+        { bioguide_id: "1085", name: "Ted Cruz", party: "R", chamber: "Senate", state: "TX", trades_count: 11 },
+        { bioguide_id: "1086", name: "Mike Lee", party: "R", chamber: "Senate", state: "UT", trades_count: 8 },
+        { bioguide_id: "1087", name: "Mitt Romney", party: "R", chamber: "Senate", state: "UT", trades_count: 23 },
+        { bioguide_id: "1088", name: "Bernie Sanders", party: "I", chamber: "Senate", state: "VT", trades_count: 4 },
+        { bioguide_id: "1089", name: "Peter Welch", party: "D", chamber: "Senate", state: "VT", trades_count: 9 },
+        { bioguide_id: "1090", name: "Mark Warner", party: "D", chamber: "Senate", state: "VA", trades_count: 35 },
+        { bioguide_id: "1091", name: "Tim Kaine", party: "D", chamber: "Senate", state: "VA", trades_count: 14 },
+        { bioguide_id: "1092", name: "Patty Murray", party: "D", chamber: "Senate", state: "WA", trades_count: 12 },
+        { bioguide_id: "1093", name: "Maria Cantwell", party: "D", chamber: "Senate", state: "WA", trades_count: 20 },
+        { bioguide_id: "1094", name: "Joe Manchin", party: "D", chamber: "Senate", state: "WV", trades_count: 29 },
+        { bioguide_id: "1095", name: "Shelley Moore Capito", party: "R", chamber: "Senate", state: "WV", trades_count: 10 },
+        { bioguide_id: "1096", name: "Tammy Baldwin", party: "D", chamber: "Senate", state: "WI", trades_count: 11 },
+        { bioguide_id: "1097", name: "Ron Johnson", party: "R", chamber: "Senate", state: "WI", trades_count: 18 },
+        { bioguide_id: "1098", name: "John Barrasso", party: "R", chamber: "Senate", state: "WY", trades_count: 12 },
+        { bioguide_id: "1099", name: "Cynthia Lummis", party: "R", chamber: "Senate", state: "WY", trades_count: 27 },
+        { bioguide_id: "1100", name: "Nancy Pelosi", party: "D", chamber: "House", state: "CA", trades_count: 42 },
+        { bioguide_id: "1101", name: "Kevin McCarthy", party: "R", chamber: "House", state: "CA", trades_count: 18 },
+        { bioguide_id: "1102", name: "Hakeem Jeffries", party: "D", chamber: "House", state: "NY", trades_count: 8 },
+        { bioguide_id: "1103", name: "Alexandria Ocasio-Cortez", party: "D", chamber: "House", state: "NY", trades_count: 5 },
+        { bioguide_id: "1104", name: "Marjorie Taylor Greene", party: "R", chamber: "House", state: "GA", trades_count: 21 },
+        { bioguide_id: "1105", name: "Jim Jordan", party: "R", chamber: "House", state: "OH", trades_count: 7 },
+        { bioguide_id: "1106", name: "Dan Crenshaw", party: "R", chamber: "House", state: "TX", trades_count: 28 },
+        { bioguide_id: "1107", name: "Josh Gottheimer", party: "D", chamber: "House", state: "NJ", trades_count: 38 },
+        { bioguide_id: "1108", name: "Michael McCaul", party: "R", chamber: "House", state: "TX", trades_count: 35 },
+        { bioguide_id: "1109", name: "Ro Khanna", party: "D", chamber: "House", state: "CA", trades_count: 24 },
+        { bioguide_id: "1110", name: "Scott Franklin", party: "R", chamber: "House", state: "FL", trades_count: 26 },
+        { bioguide_id: "1111", name: "Suzan DelBene", party: "D", chamber: "House", state: "WA", trades_count: 21 },
+        { bioguide_id: "1112", name: "Pat Fallon", party: "R", chamber: "House", state: "TX", trades_count: 20 },
+        { bioguide_id: "1113", name: "Debbie Dingell", party: "D", chamber: "House", state: "MI", trades_count: 18 },
+        { bioguide_id: "1114", name: "Vern Buchanan", party: "R", chamber: "House", state: "FL", trades_count: 23 },
+        { bioguide_id: "1115", name: "French Hill", party: "R", chamber: "House", state: "AR", trades_count: 19 },
+        { bioguide_id: "1116", name: "Mike Kelly", party: "R", chamber: "House", state: "PA", trades_count: 22 },
+        { bioguide_id: "1117", name: "Don Beyer", party: "D", chamber: "House", state: "VA", trades_count: 24 },
+        { bioguide_id: "1118", name: "David Schweikert", party: "R", chamber: "House", state: "AZ", trades_count: 28 },
+        { bioguide_id: "1119", name: "Claudia Tenney", party: "R", chamber: "House", state: "NY", trades_count: 21 },
+        { bioguide_id: "1120", name: "Brian Fitzpatrick", party: "R", chamber: "House", state: "PA", trades_count: 19 },
+        { bioguide_id: "1121", name: "Darrell Issa", party: "R", chamber: "House", state: "CA", trades_count: 19 },
+        { bioguide_id: "1122", name: "Gregory Meeks", party: "D", chamber: "House", state: "NY", trades_count: 18 },
+        { bioguide_id: "1123", name: "Carlos Gimenez", party: "R", chamber: "House", state: "FL", trades_count: 17 },
+        { bioguide_id: "1124", name: "Joaquin Castro", party: "D", chamber: "House", state: "TX", trades_count: 16 },
+        { bioguide_id: "1125", name: "Gerry Connolly", party: "D", chamber: "House", state: "VA", trades_count: 16 },
+        { bioguide_id: "1126", name: "Doris Matsui", party: "D", chamber: "House", state: "CA", trades_count: 17 },
+        { bioguide_id: "1127", name: "Tom Kean Jr.", party: "R", chamber: "House", state: "NJ", trades_count: 16 },
+        { bioguide_id: "1128", name: "Glenn Grothman", party: "R", chamber: "House", state: "WI", trades_count: 15 },
+        { bioguide_id: "1129", name: "Debbie Wasserman Schultz", party: "D", chamber: "House", state: "FL", trades_count: 15 },
+        { bioguide_id: "1130", name: "Jason Crow", party: "D", chamber: "House", state: "CO", trades_count: 15 },
+        { bioguide_id: "1131", name: "Brendan Boyle", party: "D", chamber: "House", state: "PA", trades_count: 15 },
+        { bioguide_id: "1132", name: "Linda Sanchez", party: "D", chamber: "House", state: "CA", trades_count: 14 },
+        { bioguide_id: "1133", name: "Rob Wittman", party: "R", chamber: "House", state: "VA", trades_count: 14 },
+        { bioguide_id: "1134", name: "Elise Stefanik", party: "R", chamber: "House", state: "NY", trades_count: 14 },
+        { bioguide_id: "1135", name: "Brian Mast", party: "R", chamber: "House", state: "FL", trades_count: 14 },
+        { bioguide_id: "1136", name: "Adam Smith", party: "D", chamber: "House", state: "WA", trades_count: 14 },
+        { bioguide_id: "1137", name: "Matt Cartwright", party: "D", chamber: "House", state: "PA", trades_count: 13 },
+        { bioguide_id: "1138", name: "Anna Eshoo", party: "D", chamber: "House", state: "CA", trades_count: 13 },
+        { bioguide_id: "1139", name: "Gus Bilirakis", party: "R", chamber: "House", state: "FL", trades_count: 13 },
+        { bioguide_id: "1140", name: "Abigail Spanberger", party: "D", chamber: "House", state: "VA", trades_count: 13 },
+        { bioguide_id: "1141", name: "Eric Swalwell", party: "D", chamber: "House", state: "CA", trades_count: 12 },
+        { bioguide_id: "1142", name: "Randy Weber", party: "R", chamber: "House", state: "TX", trades_count: 12 },
+        { bioguide_id: "1143", name: "David Scott", party: "D", chamber: "House", state: "GA", trades_count: 12 },
+        { bioguide_id: "1144", name: "Mike Gallagher", party: "R", chamber: "House", state: "WI", trades_count: 12 },
+        { bioguide_id: "1145", name: "Barbara Lee", party: "D", chamber: "House", state: "CA", trades_count: 11 },
+        { bioguide_id: "1146", name: "Rick Larsen", party: "D", chamber: "House", state: "WA", trades_count: 11 },
+        { bioguide_id: "1147", name: "Joe Neguse", party: "D", chamber: "House", state: "CO", trades_count: 11 },
+        { bioguide_id: "1148", name: "Mario Diaz-Balart", party: "R", chamber: "House", state: "FL", trades_count: 11 },
+        { bioguide_id: "1149", name: "Scott Perry", party: "R", chamber: "House", state: "PA", trades_count: 11 },
+        { bioguide_id: "1150", name: "Rachel Walker", party: "R", chamber: "House", state: "AL", trades_count: 15 },
+        { bioguide_id: "1151", name: "Amanda Martin", party: "R", chamber: "House", state: "AK", trades_count: 10 },
+        { bioguide_id: "1152", name: "Shirley Cruz", party: "D", chamber: "House", state: "AZ", trades_count: 23 },
+        { bioguide_id: "1153", name: "Christine Cook", party: "R", chamber: "House", state: "AR", trades_count: 3 },
+        { bioguide_id: "1154", name: "Lisa Brown", party: "R", chamber: "House", state: "CA", trades_count: 15 },
+        { bioguide_id: "1155", name: "Nicole Reyes", party: "D", chamber: "House", state: "CO", trades_count: 22 },
+        { bioguide_id: "1156", name: "Janet Nelson", party: "D", chamber: "House", state: "CT", trades_count: 3 },
+        { bioguide_id: "1157", name: "Melissa Diaz", party: "D", chamber: "House", state: "DE", trades_count: 2 },
+        { bioguide_id: "1158", name: "Mark Sanchez", party: "R", chamber: "House", state: "FL", trades_count: 15 },
+        { bioguide_id: "1159", name: "Sharon Martin", party: "D", chamber: "House", state: "GA", trades_count: 18 },
+        { bioguide_id: "1160", name: "Lisa Reed", party: "R", chamber: "House", state: "HI", trades_count: 6 },
+        { bioguide_id: "1161", name: "Richard Clark", party: "R", chamber: "House", state: "ID", trades_count: 8 },
+        { bioguide_id: "1162", name: "James Barnes", party: "R", chamber: "House", state: "IL", trades_count: 4 },
+        { bioguide_id: "1163", name: "Benjamin Ross", party: "D", chamber: "House", state: "IN", trades_count: 16 },
+        { bioguide_id: "1164", name: "Catherine Bell", party: "R", chamber: "House", state: "IA", trades_count: 11 },
+        { bioguide_id: "1165", name: "Carolyn Jackson", party: "R", chamber: "House", state: "KS", trades_count: 15 },
+        { bioguide_id: "1166", name: "Stephanie Rivera", party: "R", chamber: "House", state: "KY", trades_count: 14 },
+        { bioguide_id: "1167", name: "Michael Cruz", party: "R", chamber: "House", state: "LA", trades_count: 10 },
+        { bioguide_id: "1168", name: "Anthony Cook", party: "D", chamber: "House", state: "ME", trades_count: 22 },
+        { bioguide_id: "1169", name: "Virginia Powell", party: "R", chamber: "House", state: "MD", trades_count: 17 },
+        { bioguide_id: "1170", name: "Catherine Ross", party: "D", chamber: "House", state: "MA", trades_count: 8 },
+        { bioguide_id: "1171", name: "Ashley Bennett", party: "R", chamber: "House", state: "MI", trades_count: 24 },
+        { bioguide_id: "1172", name: "Kenneth Lewis", party: "R", chamber: "House", state: "MN", trades_count: 16 },
+        { bioguide_id: "1173", name: "Christopher Campbell", party: "R", chamber: "House", state: "MS", trades_count: 14 },
+        { bioguide_id: "1174", name: "Janet Powell", party: "D", chamber: "House", state: "MO", trades_count: 4 },
+        { bioguide_id: "1175", name: "Anna Bailey", party: "R", chamber: "House", state: "MT", trades_count: 15 },
+        { bioguide_id: "1176", name: "Margaret Torres", party: "R", chamber: "House", state: "NE", trades_count: 13 },
+        { bioguide_id: "1177", name: "Kathleen Myers", party: "R", chamber: "House", state: "NV", trades_count: 3 },
+        { bioguide_id: "1178", name: "Kenneth Jones", party: "D", chamber: "House", state: "NH", trades_count: 24 },
+        { bioguide_id: "1179", name: "Karen Long", party: "D", chamber: "House", state: "NJ", trades_count: 12 },
+        { bioguide_id: "1180", name: "Laura Davis", party: "R", chamber: "House", state: "NM", trades_count: 4 },
+        { bioguide_id: "1181", name: "Ashley Perez", party: "D", chamber: "House", state: "NY", trades_count: 21 },
+        { bioguide_id: "1182", name: "Jennifer Garcia", party: "D", chamber: "House", state: "NC", trades_count: 9 },
+        { bioguide_id: "1183", name: "Dorothy Wilson", party: "R", chamber: "House", state: "ND", trades_count: 20 },
+        { bioguide_id: "1184", name: "Samuel James", party: "R", chamber: "House", state: "OH", trades_count: 10 },
+        { bioguide_id: "1185", name: "Christopher Collins", party: "R", chamber: "House", state: "OK", trades_count: 24 },
+        { bioguide_id: "1186", name: "Patricia Morales", party: "R", chamber: "House", state: "OR", trades_count: 25 },
+        { bioguide_id: "1187", name: "Helen Wright", party: "R", chamber: "House", state: "PA", trades_count: 9 },
+        { bioguide_id: "1188", name: "Amy Hernandez", party: "R", chamber: "House", state: "RI", trades_count: 19 },
+        { bioguide_id: "1189", name: "Heather Davis", party: "D", chamber: "House", state: "SC", trades_count: 7 },
+        { bioguide_id: "1190", name: "Kevin Bailey", party: "D", chamber: "House", state: "SD", trades_count: 16 },
+        { bioguide_id: "1191", name: "Matthew Cruz", party: "R", chamber: "House", state: "TN", trades_count: 13 },
+        { bioguide_id: "1192", name: "Robert Scott", party: "R", chamber: "House", state: "TX", trades_count: 9 },
+        { bioguide_id: "1193", name: "Carol Hernandez", party: "D", chamber: "House", state: "UT", trades_count: 6 },
+        { bioguide_id: "1194", name: "Catherine Gutierrez", party: "R", chamber: "House", state: "VT", trades_count: 19 },
+        { bioguide_id: "1195", name: "Scott Hall", party: "D", chamber: "House", state: "VA", trades_count: 20 },
+        { bioguide_id: "1196", name: "Timothy Harris", party: "R", chamber: "House", state: "WA", trades_count: 15 },
+        { bioguide_id: "1197", name: "Timothy Jackson", party: "D", chamber: "House", state: "WV", trades_count: 16 },
+        { bioguide_id: "1198", name: "Joshua James", party: "D", chamber: "House", state: "WI", trades_count: 8 },
+        { bioguide_id: "1199", name: "Sandra Perry", party: "R", chamber: "House", state: "WY", trades_count: 19 },
+        { bioguide_id: "1200", name: "Mark Adams", party: "D", chamber: "House", state: "AL", trades_count: 1 },
+        { bioguide_id: "1201", name: "Kimberly Allen", party: "R", chamber: "House", state: "AK", trades_count: 12 },
+        { bioguide_id: "1202", name: "Julie Ortiz", party: "D", chamber: "House", state: "AZ", trades_count: 9 },
+        { bioguide_id: "1203", name: "Ashley Bell", party: "D", chamber: "House", state: "AR", trades_count: 7 },
+        { bioguide_id: "1204", name: "Debra Gray", party: "R", chamber: "House", state: "CA", trades_count: 16 },
+        { bioguide_id: "1205", name: "Laura Walker", party: "R", chamber: "House", state: "CO", trades_count: 16 },
+        { bioguide_id: "1206", name: "Maria Hughes", party: "D", chamber: "House", state: "CT", trades_count: 10 },
+        { bioguide_id: "1207", name: "Debra Parker", party: "R", chamber: "House", state: "DE", trades_count: 1 },
+        { bioguide_id: "1208", name: "David Cooper", party: "R", chamber: "House", state: "FL", trades_count: 25 },
+        { bioguide_id: "1209", name: "Gary Torres", party: "R", chamber: "House", state: "GA", trades_count: 9 },
+        { bioguide_id: "1210", name: "John Walker", party: "R", chamber: "House", state: "HI", trades_count: 6 },
+        { bioguide_id: "1211", name: "Amanda Adams", party: "D", chamber: "House", state: "ID", trades_count: 7 },
+        { bioguide_id: "1212", name: "Kimberly Morgan", party: "R", chamber: "House", state: "IL", trades_count: 5 },
+        { bioguide_id: "1213", name: "Helen Sanders", party: "R", chamber: "House", state: "IN", trades_count: 1 },
+        { bioguide_id: "1214", name: "Stephen Smith", party: "D", chamber: "House", state: "IA", trades_count: 14 },
+        { bioguide_id: "1215", name: "Shirley Perez", party: "D", chamber: "House", state: "KS", trades_count: 1 },
+        { bioguide_id: "1216", name: "Scott Martin", party: "R", chamber: "House", state: "KY", trades_count: 20 },
+        { bioguide_id: "1217", name: "Justin Howard", party: "D", chamber: "House", state: "LA", trades_count: 19 },
+        { bioguide_id: "1218", name: "Elizabeth Powell", party: "R", chamber: "House", state: "ME", trades_count: 5 },
+        { bioguide_id: "1219", name: "Susan Walker", party: "R", chamber: "House", state: "MD", trades_count: 10 },
+        { bioguide_id: "1220", name: "Katherine Reyes", party: "R", chamber: "House", state: "MA", trades_count: 19 },
+        { bioguide_id: "1221", name: "Carolyn Wood", party: "D", chamber: "House", state: "MI", trades_count: 10 },
+        { bioguide_id: "1222", name: "Samuel Davis", party: "R", chamber: "House", state: "MN", trades_count: 1 },
+        { bioguide_id: "1223", name: "Steven Johnson", party: "R", chamber: "House", state: "MS", trades_count: 23 },
+        { bioguide_id: "1224", name: "Katherine Martinez", party: "D", chamber: "House", state: "MO", trades_count: 11 },
+        { bioguide_id: "1225", name: "Barbara Robinson", party: "D", chamber: "House", state: "MT", trades_count: 16 },
+        { bioguide_id: "1226", name: "Janet Gomez", party: "D", chamber: "House", state: "NE", trades_count: 18 },
+        { bioguide_id: "1227", name: "Pamela Kelly", party: "R", chamber: "House", state: "NV", trades_count: 19 },
+        { bioguide_id: "1228", name: "Thomas Evans", party: "D", chamber: "House", state: "NH", trades_count: 9 },
+        { bioguide_id: "1229", name: "Robert Walker", party: "D", chamber: "House", state: "NJ", trades_count: 2 },
+        { bioguide_id: "1230", name: "Thomas Perry", party: "D", chamber: "House", state: "NM", trades_count: 20 },
+        { bioguide_id: "1231", name: "Anna Rivera", party: "D", chamber: "House", state: "NY", trades_count: 3 },
+        { bioguide_id: "1232", name: "Carolyn Rogers", party: "D", chamber: "House", state: "NC", trades_count: 3 },
+        { bioguide_id: "1233", name: "Virginia Edwards", party: "R", chamber: "House", state: "ND", trades_count: 24 },
+        { bioguide_id: "1234", name: "Jennifer Scott", party: "D", chamber: "House", state: "OH", trades_count: 5 },
+        { bioguide_id: "1235", name: "Jonathan Roberts", party: "R", chamber: "House", state: "OK", trades_count: 11 },
+        { bioguide_id: "1236", name: "George Powell", party: "R", chamber: "House", state: "OR", trades_count: 25 },
+        { bioguide_id: "1237", name: "Christopher King", party: "R", chamber: "House", state: "PA", trades_count: 2 },
+        { bioguide_id: "1238", name: "Ruth Rodriguez", party: "D", chamber: "House", state: "RI", trades_count: 14 },
+        { bioguide_id: "1239", name: "Julie Harris", party: "D", chamber: "House", state: "SC", trades_count: 23 },
+        { bioguide_id: "1240", name: "Ruth Robinson", party: "D", chamber: "House", state: "SD", trades_count: 23 },
+        { bioguide_id: "1241", name: "Stephanie Cruz", party: "R", chamber: "House", state: "TN", trades_count: 17 },
+        { bioguide_id: "1242", name: "Samantha Murphy", party: "R", chamber: "House", state: "TX", trades_count: 1 },
+        { bioguide_id: "1243", name: "Julie Richardson", party: "R", chamber: "House", state: "UT", trades_count: 13 },
+        { bioguide_id: "1244", name: "Paul Davis", party: "D", chamber: "House", state: "VT", trades_count: 24 },
+        { bioguide_id: "1245", name: "John Johnson", party: "D", chamber: "House", state: "VA", trades_count: 21 },
+        { bioguide_id: "1246", name: "Samantha Lee", party: "D", chamber: "House", state: "WA", trades_count: 20 },
+        { bioguide_id: "1247", name: "Virginia Lewis", party: "R", chamber: "House", state: "WV", trades_count: 11 },
+        { bioguide_id: "1248", name: "Joseph Cruz", party: "R", chamber: "House", state: "WI", trades_count: 8 },
+        { bioguide_id: "1249", name: "John Murphy", party: "R", chamber: "House", state: "WY", trades_count: 6 },
+        { bioguide_id: "1250", name: "Edward King", party: "R", chamber: "House", state: "AL", trades_count: 21 },
+        { bioguide_id: "1251", name: "Karen Parker", party: "D", chamber: "House", state: "AK", trades_count: 19 },
+        { bioguide_id: "1252", name: "Ryan Gonzalez", party: "D", chamber: "House", state: "AZ", trades_count: 5 },
+        { bioguide_id: "1253", name: "Jeffrey Martinez", party: "R", chamber: "House", state: "AR", trades_count: 19 },
+        { bioguide_id: "1254", name: "Amanda Davis", party: "D", chamber: "House", state: "CA", trades_count: 13 },
+        { bioguide_id: "1255", name: "William Anderson", party: "D", chamber: "House", state: "CO", trades_count: 18 },
+        { bioguide_id: "1256", name: "Ruth Brown", party: "D", chamber: "House", state: "CT", trades_count: 19 },
+        { bioguide_id: "1257", name: "Nicole Mitchell", party: "D", chamber: "House", state: "DE", trades_count: 16 },
+        { bioguide_id: "1258", name: "Ashley Howard", party: "R", chamber: "House", state: "FL", trades_count: 1 },
+        { bioguide_id: "1259", name: "Joseph Edwards", party: "R", chamber: "House", state: "GA", trades_count: 8 },
+        { bioguide_id: "1260", name: "Karen Nelson", party: "D", chamber: "House", state: "HI", trades_count: 24 },
+        { bioguide_id: "1261", name: "Mark Moore", party: "R", chamber: "House", state: "ID", trades_count: 18 },
+        { bioguide_id: "1262", name: "Betty Bailey", party: "R", chamber: "House", state: "IL", trades_count: 8 },
+        { bioguide_id: "1263", name: "Paul Fisher", party: "R", chamber: "House", state: "IN", trades_count: 4 },
+        { bioguide_id: "1264", name: "Kathleen Powell", party: "R", chamber: "House", state: "IA", trades_count: 14 },
+        { bioguide_id: "1265", name: "James Perry", party: "D", chamber: "House", state: "KS", trades_count: 22 },
+        { bioguide_id: "1266", name: "Kathleen Peterson", party: "D", chamber: "House", state: "KY", trades_count: 14 },
+        { bioguide_id: "1267", name: "Heather Hughes", party: "R", chamber: "House", state: "LA", trades_count: 16 },
+        { bioguide_id: "1268", name: "Sarah Rodriguez", party: "D", chamber: "House", state: "ME", trades_count: 13 },
+        { bioguide_id: "1269", name: "Gary Brown", party: "R", chamber: "House", state: "MD", trades_count: 25 },
+        { bioguide_id: "1270", name: "Timothy Garcia", party: "D", chamber: "House", state: "MA", trades_count: 11 },
+        { bioguide_id: "1271", name: "Sarah Rogers", party: "R", chamber: "House", state: "MI", trades_count: 19 },
+        { bioguide_id: "1272", name: "Donna Bennett", party: "R", chamber: "House", state: "MN", trades_count: 19 },
+        { bioguide_id: "1273", name: "Heather Taylor", party: "R", chamber: "House", state: "MS", trades_count: 2 },
+        { bioguide_id: "1274", name: "Nancy Butler", party: "D", chamber: "House", state: "MO", trades_count: 2 },
+        { bioguide_id: "1275", name: "Sharon Adams", party: "D", chamber: "House", state: "MT", trades_count: 12 },
+        { bioguide_id: "1276", name: "Rachel Scott", party: "R", chamber: "House", state: "NE", trades_count: 1 },
+        { bioguide_id: "1277", name: "Maria Long", party: "R", chamber: "House", state: "NV", trades_count: 13 },
+        { bioguide_id: "1278", name: "Scott Powell", party: "D", chamber: "House", state: "NH", trades_count: 13 },
+        { bioguide_id: "1279", name: "Matthew Bell", party: "D", chamber: "House", state: "NJ", trades_count: 1 },
+        { bioguide_id: "1280", name: "Brian Rivera", party: "R", chamber: "House", state: "NM", trades_count: 18 },
+        { bioguide_id: "1281", name: "Scott Parker", party: "R", chamber: "House", state: "NY", trades_count: 20 },
+        { bioguide_id: "1282", name: "Linda Howard", party: "D", chamber: "House", state: "NC", trades_count: 11 },
+        { bioguide_id: "1283", name: "Elizabeth Hall", party: "D", chamber: "House", state: "ND", trades_count: 2 },
+        { bioguide_id: "1284", name: "Maria Murphy", party: "D", chamber: "House", state: "OH", trades_count: 16 },
+        { bioguide_id: "1285", name: "Jonathan Gomez", party: "R", chamber: "House", state: "OK", trades_count: 21 },
+        { bioguide_id: "1286", name: "Emily Lewis", party: "D", chamber: "House", state: "OR", trades_count: 20 },
+        { bioguide_id: "1287", name: "Heather Richardson", party: "D", chamber: "House", state: "PA", trades_count: 14 },
+        { bioguide_id: "1288", name: "Sandra Lopez", party: "R", chamber: "House", state: "RI", trades_count: 5 },
+        { bioguide_id: "1289", name: "James Diaz", party: "D", chamber: "House", state: "SC", trades_count: 13 },
+        { bioguide_id: "1290", name: "Justin Martinez", party: "D", chamber: "House", state: "SD", trades_count: 14 },
+        { bioguide_id: "1291", name: "Patricia Perry", party: "R", chamber: "House", state: "TN", trades_count: 15 },
+        { bioguide_id: "1292", name: "Joshua Diaz", party: "D", chamber: "House", state: "TX", trades_count: 5 },
+        { bioguide_id: "1293", name: "Melissa Morales", party: "R", chamber: "House", state: "UT", trades_count: 24 },
+        { bioguide_id: "1294", name: "Amanda Bailey", party: "D", chamber: "House", state: "VT", trades_count: 24 },
+        { bioguide_id: "1295", name: "James Brooks", party: "R", chamber: "House", state: "VA", trades_count: 4 },
+        { bioguide_id: "1296", name: "Sandra Diaz", party: "R", chamber: "House", state: "WA", trades_count: 19 },
+        { bioguide_id: "1297", name: "Samantha Gomez", party: "R", chamber: "House", state: "WV", trades_count: 20 },
+        { bioguide_id: "1298", name: "Pamela Moore", party: "R", chamber: "House", state: "WI", trades_count: 3 },
+        { bioguide_id: "1299", name: "Elizabeth Butler", party: "D", chamber: "House", state: "WY", trades_count: 9 },
+        { bioguide_id: "1300", name: "Helen Rivera", party: "R", chamber: "House", state: "AL", trades_count: 22 },
+        { bioguide_id: "1301", name: "Dorothy Davis", party: "D", chamber: "House", state: "AK", trades_count: 11 },
+        { bioguide_id: "1302", name: "Scott Richardson", party: "D", chamber: "House", state: "AZ", trades_count: 15 },
+        { bioguide_id: "1303", name: "Andrew Ward", party: "D", chamber: "House", state: "AR", trades_count: 2 },
+        { bioguide_id: "1304", name: "Daniel Brown", party: "D", chamber: "House", state: "CA", trades_count: 15 },
+        { bioguide_id: "1305", name: "Barbara Walker", party: "D", chamber: "House", state: "CO", trades_count: 4 },
+        { bioguide_id: "1306", name: "Matthew Allen", party: "R", chamber: "House", state: "CT", trades_count: 2 },
+        { bioguide_id: "1307", name: "Kimberly Fisher", party: "D", chamber: "House", state: "DE", trades_count: 1 },
+        { bioguide_id: "1308", name: "Olivia Rodriguez", party: "R", chamber: "House", state: "FL", trades_count: 16 },
+        { bioguide_id: "1309", name: "Carol Ross", party: "R", chamber: "House", state: "GA", trades_count: 24 },
+        { bioguide_id: "1310", name: "Scott Johnson", party: "R", chamber: "House", state: "HI", trades_count: 13 },
+        { bioguide_id: "1311", name: "Eric Green", party: "D", chamber: "House", state: "ID", trades_count: 8 },
+        { bioguide_id: "1312", name: "Donna Green", party: "D", chamber: "House", state: "IL", trades_count: 1 },
+        { bioguide_id: "1313", name: "Stephen Moore", party: "D", chamber: "House", state: "IN", trades_count: 4 },
+        { bioguide_id: "1314", name: "Joyce Perez", party: "R", chamber: "House", state: "IA", trades_count: 16 },
+        { bioguide_id: "1315", name: "Mark Smith", party: "R", chamber: "House", state: "KS", trades_count: 8 },
+        { bioguide_id: "1316", name: "Richard Diaz", party: "D", chamber: "House", state: "KY", trades_count: 1 },
+        { bioguide_id: "1317", name: "Shirley Young", party: "R", chamber: "House", state: "LA", trades_count: 18 },
+        { bioguide_id: "1318", name: "Ronald Flores", party: "R", chamber: "House", state: "ME", trades_count: 2 },
+        { bioguide_id: "1319", name: "Anthony Garcia", party: "D", chamber: "House", state: "MD", trades_count: 12 },
+        { bioguide_id: "1320", name: "Carol Ward", party: "R", chamber: "House", state: "MA", trades_count: 12 },
+        { bioguide_id: "1321", name: "Larry Lee", party: "D", chamber: "House", state: "MI", trades_count: 17 },
+        { bioguide_id: "1322", name: "Betty Taylor", party: "D", chamber: "House", state: "MN", trades_count: 5 },
+        { bioguide_id: "1323", name: "Sandra Walker", party: "D", chamber: "House", state: "MS", trades_count: 19 },
+        { bioguide_id: "1324", name: "Debra Green", party: "R", chamber: "House", state: "MO", trades_count: 23 },
+        { bioguide_id: "1325", name: "Melissa Roberts", party: "D", chamber: "House", state: "MT", trades_count: 13 },
+        { bioguide_id: "1326", name: "Samantha Adams", party: "D", chamber: "House", state: "NE", trades_count: 25 },
+        { bioguide_id: "1327", name: "Steven Scott", party: "R", chamber: "House", state: "NV", trades_count: 19 },
+        { bioguide_id: "1328", name: "Elizabeth Foster", party: "D", chamber: "House", state: "NH", trades_count: 10 },
+        { bioguide_id: "1329", name: "Maria Martinez", party: "D", chamber: "House", state: "NJ", trades_count: 21 },
+        { bioguide_id: "1330", name: "Gary Mitchell", party: "R", chamber: "House", state: "NM", trades_count: 8 },
+        { bioguide_id: "1331", name: "Christopher Evans", party: "D", chamber: "House", state: "NY", trades_count: 20 },
+        { bioguide_id: "1332", name: "Scott Price", party: "D", chamber: "House", state: "NC", trades_count: 25 },
+        { bioguide_id: "1333", name: "Robert Bailey", party: "R", chamber: "House", state: "ND", trades_count: 15 },
+        { bioguide_id: "1334", name: "Amy Thomas", party: "R", chamber: "House", state: "OH", trades_count: 23 },
+        { bioguide_id: "1335", name: "Helen Young", party: "R", chamber: "House", state: "OK", trades_count: 9 },
+        { bioguide_id: "1336", name: "Margaret Morales", party: "R", chamber: "House", state: "OR", trades_count: 24 },
+        { bioguide_id: "1337", name: "Maria Russell", party: "R", chamber: "House", state: "PA", trades_count: 20 },
+        { bioguide_id: "1338", name: "Joshua Wood", party: "D", chamber: "House", state: "RI", trades_count: 8 },
+        { bioguide_id: "1339", name: "Lisa Hughes", party: "D", chamber: "House", state: "SC", trades_count: 16 },
+        { bioguide_id: "1340", name: "Ronald Sullivan", party: "R", chamber: "House", state: "SD", trades_count: 21 },
+        { bioguide_id: "1341", name: "Anna Turner", party: "R", chamber: "House", state: "TN", trades_count: 19 },
+        { bioguide_id: "1342", name: "Heather Flores", party: "R", chamber: "House", state: "TX", trades_count: 4 },
+        { bioguide_id: "1343", name: "Patricia Turner", party: "R", chamber: "House", state: "UT", trades_count: 2 },
+        { bioguide_id: "1344", name: "Carolyn Roberts", party: "R", chamber: "House", state: "VT", trades_count: 22 },
+        { bioguide_id: "1345", name: "Pamela Price", party: "R", chamber: "House", state: "VA", trades_count: 25 },
+        { bioguide_id: "1346", name: "Scott Sullivan", party: "D", chamber: "House", state: "WA", trades_count: 1 },
+        { bioguide_id: "1347", name: "Carolyn Rodriguez", party: "D", chamber: "House", state: "WV", trades_count: 5 },
+        { bioguide_id: "1348", name: "George Turner", party: "D", chamber: "House", state: "WI", trades_count: 18 },
+        { bioguide_id: "1349", name: "George Allen", party: "R", chamber: "House", state: "WY", trades_count: 24 },
+        { bioguide_id: "1350", name: "Angela Long", party: "R", chamber: "House", state: "AL", trades_count: 3 },
+        { bioguide_id: "1351", name: "Kimberly Long", party: "D", chamber: "House", state: "AK", trades_count: 22 },
+        { bioguide_id: "1352", name: "Samuel Green", party: "R", chamber: "House", state: "AZ", trades_count: 1 },
+        { bioguide_id: "1353", name: "Emily Robinson", party: "R", chamber: "House", state: "AR", trades_count: 24 },
+        { bioguide_id: "1354", name: "Eric Campbell", party: "R", chamber: "House", state: "CA", trades_count: 3 },
+        { bioguide_id: "1355", name: "Joshua Robinson", party: "R", chamber: "House", state: "CO", trades_count: 2 },
+        { bioguide_id: "1356", name: "Stephanie Hall", party: "D", chamber: "House", state: "CT", trades_count: 8 },
+        { bioguide_id: "1357", name: "David Ross", party: "R", chamber: "House", state: "DE", trades_count: 9 },
+        { bioguide_id: "1358", name: "Angela Ward", party: "R", chamber: "House", state: "FL", trades_count: 7 },
+        { bioguide_id: "1359", name: "Donna Bell", party: "D", chamber: "House", state: "GA", trades_count: 17 },
+        { bioguide_id: "1360", name: "Olivia Bell", party: "R", chamber: "House", state: "HI", trades_count: 15 },
+        { bioguide_id: "1361", name: "James Richardson", party: "R", chamber: "House", state: "ID", trades_count: 10 },
+        { bioguide_id: "1362", name: "Stephen Jenkins", party: "D", chamber: "House", state: "IL", trades_count: 13 },
+        { bioguide_id: "1363", name: "Nancy Hernandez", party: "R", chamber: "House", state: "IN", trades_count: 10 },
+        { bioguide_id: "1364", name: "Lisa Evans", party: "D", chamber: "House", state: "IA", trades_count: 25 },
+        { bioguide_id: "1365", name: "Carol Flores", party: "D", chamber: "House", state: "KS", trades_count: 9 },
+        { bioguide_id: "1366", name: "Katherine Adams", party: "R", chamber: "House", state: "KY", trades_count: 11 },
+        { bioguide_id: "1367", name: "Edward Fisher", party: "D", chamber: "House", state: "LA", trades_count: 11 },
+        { bioguide_id: "1368", name: "Margaret Thomas", party: "D", chamber: "House", state: "ME", trades_count: 3 },
+        { bioguide_id: "1369", name: "Shirley Gutierrez", party: "R", chamber: "House", state: "MD", trades_count: 23 },
+        { bioguide_id: "1370", name: "Kimberly Johnson", party: "D", chamber: "House", state: "MA", trades_count: 16 },
+        { bioguide_id: "1371", name: "Larry Adams", party: "R", chamber: "House", state: "MI", trades_count: 7 },
+        { bioguide_id: "1372", name: "Larry Richardson", party: "D", chamber: "House", state: "MN", trades_count: 24 },
+        { bioguide_id: "1373", name: "Christine Jones", party: "R", chamber: "House", state: "MS", trades_count: 12 },
+        { bioguide_id: "1374", name: "Sharon Martinez", party: "R", chamber: "House", state: "MO", trades_count: 21 },
+        { bioguide_id: "1375", name: "Heather Harris", party: "D", chamber: "House", state: "MT", trades_count: 23 },
+        { bioguide_id: "1376", name: "Steven Gutierrez", party: "D", chamber: "House", state: "NE", trades_count: 18 },
+        { bioguide_id: "1377", name: "Karen Barnes", party: "D", chamber: "House", state: "NV", trades_count: 23 },
+        { bioguide_id: "1378", name: "Elizabeth Allen", party: "D", chamber: "House", state: "NH", trades_count: 12 },
+        { bioguide_id: "1379", name: "Debra Moore", party: "D", chamber: "House", state: "NJ", trades_count: 19 },
+        { bioguide_id: "1380", name: "Christopher Green", party: "D", chamber: "House", state: "NM", trades_count: 8 },
+        { bioguide_id: "1381", name: "Edward Rodriguez", party: "R", chamber: "House", state: "NY", trades_count: 13 },
+        { bioguide_id: "1382", name: "Pamela Stewart", party: "D", chamber: "House", state: "NC", trades_count: 11 },
+        { bioguide_id: "1383", name: "Ryan Reed", party: "D", chamber: "House", state: "ND", trades_count: 1 },
+        { bioguide_id: "1384", name: "Kathleen Ramirez", party: "R", chamber: "House", state: "OH", trades_count: 19 },
+        { bioguide_id: "1385", name: "Shirley Howard", party: "D", chamber: "House", state: "OK", trades_count: 1 },
+        { bioguide_id: "1386", name: "Barbara Jenkins", party: "D", chamber: "House", state: "OR", trades_count: 8 },
+        { bioguide_id: "1387", name: "Jessica Martin", party: "R", chamber: "House", state: "PA", trades_count: 7 },
+        { bioguide_id: "1388", name: "Ronald Cooper", party: "R", chamber: "House", state: "RI", trades_count: 25 },
+        { bioguide_id: "1389", name: "Brenda Barnes", party: "D", chamber: "House", state: "SC", trades_count: 14 },
+        { bioguide_id: "1390", name: "Ruth Harris", party: "R", chamber: "House", state: "SD", trades_count: 6 },
+        { bioguide_id: "1391", name: "David Bailey", party: "R", chamber: "House", state: "TN", trades_count: 22 },
+        { bioguide_id: "1392", name: "Olivia Nguyen", party: "R", chamber: "House", state: "TX", trades_count: 21 },
+        { bioguide_id: "1393", name: "Nancy Perez", party: "R", chamber: "House", state: "UT", trades_count: 13 },
+        { bioguide_id: "1394", name: "Rachel Howard", party: "R", chamber: "House", state: "VT", trades_count: 21 },
+        { bioguide_id: "1395", name: "Margaret Brown", party: "D", chamber: "House", state: "VA", trades_count: 19 },
+        { bioguide_id: "1396", name: "Maria Carter", party: "D", chamber: "House", state: "WA", trades_count: 17 },
+        { bioguide_id: "1397", name: "Heather Lopez", party: "D", chamber: "House", state: "WV", trades_count: 7 },
+        { bioguide_id: "1398", name: "Angela Green", party: "D", chamber: "House", state: "WI", trades_count: 6 },
+        { bioguide_id: "1399", name: "Jeffrey Morris", party: "D", chamber: "House", state: "WY", trades_count: 1 },
+        { bioguide_id: "1400", name: "Amanda Walker", party: "D", chamber: "House", state: "AL", trades_count: 11 },
+        { bioguide_id: "1401", name: "Nicholas Green", party: "D", chamber: "House", state: "AK", trades_count: 16 },
+        { bioguide_id: "1402", name: "Joshua Myers", party: "D", chamber: "House", state: "AZ", trades_count: 7 },
+        { bioguide_id: "1403", name: "Carol Martinez", party: "D", chamber: "House", state: "AR", trades_count: 8 },
+        { bioguide_id: "1404", name: "Olivia Evans", party: "D", chamber: "House", state: "CA", trades_count: 11 },
+        { bioguide_id: "1405", name: "David Ramirez", party: "D", chamber: "House", state: "CO", trades_count: 25 },
+        { bioguide_id: "1406", name: "Ruth Bailey", party: "R", chamber: "House", state: "CT", trades_count: 15 },
+        { bioguide_id: "1407", name: "Kimberly Jones", party: "D", chamber: "House", state: "DE", trades_count: 4 },
+        { bioguide_id: "1408", name: "Robert Bennett", party: "R", chamber: "House", state: "FL", trades_count: 7 },
+        { bioguide_id: "1409", name: "Helen Jones", party: "D", chamber: "House", state: "GA", trades_count: 4 },
+        { bioguide_id: "1410", name: "Maria Mitchell", party: "R", chamber: "House", state: "HI", trades_count: 16 },
+        { bioguide_id: "1411", name: "Robert Diaz", party: "R", chamber: "House", state: "ID", trades_count: 23 },
+        { bioguide_id: "1412", name: "Thomas Thomas", party: "D", chamber: "House", state: "IL", trades_count: 14 },
+        { bioguide_id: "1413", name: "William Torres", party: "R", chamber: "House", state: "IN", trades_count: 21 },
+        { bioguide_id: "1414", name: "Jason Murphy", party: "D", chamber: "House", state: "IA", trades_count: 25 },
+        { bioguide_id: "1415", name: "Edward Wilson", party: "R", chamber: "House", state: "KS", trades_count: 8 },
+        { bioguide_id: "1416", name: "James Sullivan", party: "R", chamber: "House", state: "KY", trades_count: 22 },
+        { bioguide_id: "1417", name: "Kathleen Cook", party: "D", chamber: "House", state: "LA", trades_count: 20 },
+        { bioguide_id: "1418", name: "James Scott", party: "R", chamber: "House", state: "ME", trades_count: 15 },
+        { bioguide_id: "1419", name: "Carol Roberts", party: "D", chamber: "House", state: "MD", trades_count: 13 },
+        { bioguide_id: "1420", name: "Debra Miller", party: "D", chamber: "House", state: "MA", trades_count: 2 },
+        { bioguide_id: "1421", name: "Amy Green", party: "R", chamber: "House", state: "MI", trades_count: 2 },
+        { bioguide_id: "1422", name: "Dorothy Foster", party: "D", chamber: "House", state: "MN", trades_count: 6 },
+        { bioguide_id: "1423", name: "Brian Allen", party: "R", chamber: "House", state: "MS", trades_count: 6 },
+        { bioguide_id: "1424", name: "Brian Davis", party: "R", chamber: "House", state: "MO", trades_count: 22 },
+        { bioguide_id: "1425", name: "Janet Wood", party: "R", chamber: "House", state: "MT", trades_count: 23 },
+        { bioguide_id: "1426", name: "Julie Anderson", party: "R", chamber: "House", state: "NE", trades_count: 23 },
+        { bioguide_id: "1427", name: "Sandra Roberts", party: "R", chamber: "House", state: "NV", trades_count: 23 },
+        { bioguide_id: "1428", name: "Kimberly Jenkins", party: "D", chamber: "House", state: "NH", trades_count: 16 },
+        { bioguide_id: "1429", name: "Angela Moore", party: "D", chamber: "House", state: "NJ", trades_count: 21 },
+        { bioguide_id: "1430", name: "Donna Wilson", party: "D", chamber: "House", state: "NM", trades_count: 13 },
+        { bioguide_id: "1431", name: "Michael Edwards", party: "D", chamber: "House", state: "NY", trades_count: 17 },
+        { bioguide_id: "1432", name: "Sharon Powell", party: "R", chamber: "House", state: "NC", trades_count: 22 },
+        { bioguide_id: "1433", name: "Ronald Brooks", party: "R", chamber: "House", state: "ND", trades_count: 19 },
+        { bioguide_id: "1434", name: "Katherine Barnes", party: "R", chamber: "House", state: "OH", trades_count: 18 },
+        { bioguide_id: "1435", name: "Richard Johnson", party: "D", chamber: "House", state: "OK", trades_count: 16 },
+        { bioguide_id: "1436", name: "Brandon Carter", party: "R", chamber: "House", state: "OR", trades_count: 3 },
+        { bioguide_id: "1437", name: "Maria Parker", party: "D", chamber: "House", state: "PA", trades_count: 10 },
+        { bioguide_id: "1438", name: "James Edwards", party: "R", chamber: "House", state: "RI", trades_count: 18 },
+        { bioguide_id: "1439", name: "Mark Parker", party: "D", chamber: "House", state: "SC", trades_count: 4 },
+        { bioguide_id: "1440", name: "William Allen", party: "D", chamber: "House", state: "SD", trades_count: 1 },
+        { bioguide_id: "1441", name: "Timothy Morris", party: "R", chamber: "House", state: "TN", trades_count: 7 },
+        { bioguide_id: "1442", name: "Joseph Sullivan", party: "R", chamber: "House", state: "TX", trades_count: 14 },
+        { bioguide_id: "1443", name: "Cynthia Jones", party: "R", chamber: "House", state: "UT", trades_count: 4 },
+        { bioguide_id: "1444", name: "Christopher Lee", party: "R", chamber: "House", state: "VT", trades_count: 24 },
+        { bioguide_id: "1445", name: "Heather Kelly", party: "D", chamber: "House", state: "VA", trades_count: 21 },
+        { bioguide_id: "1446", name: "Stephen White", party: "R", chamber: "House", state: "WA", trades_count: 15 },
+        { bioguide_id: "1447", name: "Shirley Campbell", party: "R", chamber: "House", state: "WV", trades_count: 21 },
+        { bioguide_id: "1448", name: "Thomas Scott", party: "R", chamber: "House", state: "WI", trades_count: 3 },
+        { bioguide_id: "1449", name: "Elizabeth Price", party: "D", chamber: "House", state: "WY", trades_count: 10 },
+        { bioguide_id: "1450", name: "Janet Williams", party: "D", chamber: "House", state: "AL", trades_count: 23 },
+        { bioguide_id: "1451", name: "Carol Bailey", party: "D", chamber: "House", state: "AK", trades_count: 11 },
+        { bioguide_id: "1452", name: "Linda Lee", party: "D", chamber: "House", state: "AZ", trades_count: 15 },
+        { bioguide_id: "1453", name: "Melissa Morgan", party: "R", chamber: "House", state: "AR", trades_count: 14 },
+        { bioguide_id: "1454", name: "Angela Fisher", party: "R", chamber: "House", state: "CA", trades_count: 4 },
+        { bioguide_id: "1455", name: "James Adams", party: "D", chamber: "House", state: "CO", trades_count: 22 },
+        { bioguide_id: "1456", name: "Mary Cruz", party: "R", chamber: "House", state: "CT", trades_count: 5 },
+        { bioguide_id: "1457", name: "Ronald Hernandez", party: "R", chamber: "House", state: "DE", trades_count: 23 },
+        { bioguide_id: "1458", name: "Dorothy White", party: "D", chamber: "House", state: "FL", trades_count: 14 },
+        { bioguide_id: "1459", name: "Katherine Myers", party: "D", chamber: "House", state: "GA", trades_count: 12 },
+        { bioguide_id: "1460", name: "Ryan Bell", party: "D", chamber: "House", state: "HI", trades_count: 14 },
+        { bioguide_id: "1461", name: "Debra Baker", party: "R", chamber: "House", state: "ID", trades_count: 3 },
+        { bioguide_id: "1462", name: "Stephanie Bell", party: "R", chamber: "House", state: "IL", trades_count: 21 },
+        { bioguide_id: "1463", name: "John Ward", party: "D", chamber: "House", state: "IN", trades_count: 22 },
+        { bioguide_id: "1464", name: "Jason Bell", party: "D", chamber: "House", state: "IA", trades_count: 9 },
+        { bioguide_id: "1465", name: "Jacob Torres", party: "D", chamber: "House", state: "KS", trades_count: 15 },
+        { bioguide_id: "1466", name: "Rachel Butler", party: "D", chamber: "House", state: "KY", trades_count: 2 },
+        { bioguide_id: "1467", name: "William Gray", party: "R", chamber: "House", state: "LA", trades_count: 23 },
+        { bioguide_id: "1468", name: "Scott Lewis", party: "R", chamber: "House", state: "ME", trades_count: 6 },
+        { bioguide_id: "1469", name: "Joshua Kelly", party: "D", chamber: "House", state: "MD", trades_count: 22 },
+        { bioguide_id: "1470", name: "Ronald Martinez", party: "D", chamber: "House", state: "MA", trades_count: 2 },
+        { bioguide_id: "1471", name: "Jessica Long", party: "R", chamber: "House", state: "MI", trades_count: 11 },
+        { bioguide_id: "1472", name: "Christine Brooks", party: "D", chamber: "House", state: "MN", trades_count: 14 },
+        { bioguide_id: "1473", name: "Gary Clark", party: "R", chamber: "House", state: "MS", trades_count: 20 },
+        { bioguide_id: "1474", name: "Elizabeth Parker", party: "R", chamber: "House", state: "MO", trades_count: 10 },
+        { bioguide_id: "1475", name: "Rachel Mitchell", party: "D", chamber: "House", state: "MT", trades_count: 7 },
+        { bioguide_id: "1476", name: "Sharon Bailey", party: "R", chamber: "House", state: "NE", trades_count: 13 },
+        { bioguide_id: "1477", name: "Nancy Phillips", party: "D", chamber: "House", state: "NV", trades_count: 18 },
+        { bioguide_id: "1478", name: "Robert Cox", party: "R", chamber: "House", state: "NH", trades_count: 2 },
+        { bioguide_id: "1479", name: "Joshua Brooks", party: "R", chamber: "House", state: "NJ", trades_count: 21 },
+        { bioguide_id: "1480", name: "Michelle Evans", party: "R", chamber: "House", state: "NM", trades_count: 15 },
+        { bioguide_id: "1481", name: "Amy Ross", party: "R", chamber: "House", state: "NY", trades_count: 23 },
+        { bioguide_id: "1482", name: "Brian Rogers", party: "D", chamber: "House", state: "NC", trades_count: 7 },
+        { bioguide_id: "1483", name: "Janet Nguyen", party: "D", chamber: "House", state: "ND", trades_count: 11 },
+        { bioguide_id: "1484", name: "James White", party: "D", chamber: "House", state: "OH", trades_count: 4 },
+        { bioguide_id: "1485", name: "Pamela Torres", party: "D", chamber: "House", state: "OK", trades_count: 6 },
+        { bioguide_id: "1486", name: "Catherine Hill", party: "R", chamber: "House", state: "OR", trades_count: 2 },
+        { bioguide_id: "1487", name: "Jonathan Cook", party: "D", chamber: "House", state: "PA", trades_count: 1 },
+        { bioguide_id: "1488", name: "Betty Sanders", party: "D", chamber: "House", state: "RI", trades_count: 12 },
+        { bioguide_id: "1489", name: "Laura Martinez", party: "D", chamber: "House", state: "SC", trades_count: 18 },
+        { bioguide_id: "1490", name: "Timothy Barnes", party: "D", chamber: "House", state: "SD", trades_count: 10 },
+        { bioguide_id: "1491", name: "Mark Davis", party: "D", chamber: "House", state: "TN", trades_count: 1 },
+        { bioguide_id: "1492", name: "Mark Jackson", party: "R", chamber: "House", state: "TX", trades_count: 17 },
+        { bioguide_id: "1493", name: "Steven Stewart", party: "R", chamber: "House", state: "UT", trades_count: 3 },
+        { bioguide_id: "1494", name: "Timothy Torres", party: "D", chamber: "House", state: "VT", trades_count: 8 },
+        { bioguide_id: "1495", name: "Pamela Barnes", party: "R", chamber: "House", state: "VA", trades_count: 2 },
+        { bioguide_id: "1496", name: "Jacob Fisher", party: "D", chamber: "House", state: "WA", trades_count: 13 },
+        { bioguide_id: "1497", name: "Mark Rodriguez", party: "D", chamber: "House", state: "WV", trades_count: 20 },
+        { bioguide_id: "1498", name: "Carolyn Garcia", party: "D", chamber: "House", state: "WI", trades_count: 4 },
+        { bioguide_id: "1499", name: "Dorothy Taylor", party: "R", chamber: "House", state: "WY", trades_count: 12 },
+        { bioguide_id: "1500", name: "Scott Morales", party: "R", chamber: "House", state: "AL", trades_count: 10 },
+        { bioguide_id: "1501", name: "Margaret King", party: "R", chamber: "House", state: "AK", trades_count: 9 },
+        { bioguide_id: "1502", name: "Stephanie Foster", party: "D", chamber: "House", state: "AZ", trades_count: 2 },
+        { bioguide_id: "1503", name: "Lisa Green", party: "D", chamber: "House", state: "AR", trades_count: 18 },
+        { bioguide_id: "1504", name: "John Thompson", party: "R", chamber: "House", state: "CA", trades_count: 6 },
+        { bioguide_id: "1505", name: "Emily Cruz", party: "D", chamber: "House", state: "CO", trades_count: 16 },
+        { bioguide_id: "1506", name: "Amy Gutierrez", party: "D", chamber: "House", state: "CT", trades_count: 12 },
+        { bioguide_id: "1507", name: "Kathleen Moore", party: "D", chamber: "House", state: "DE", trades_count: 4 },
+        { bioguide_id: "1508", name: "Dorothy Diaz", party: "D", chamber: "House", state: "FL", trades_count: 5 },
+        { bioguide_id: "1509", name: "Jason Gomez", party: "D", chamber: "House", state: "GA", trades_count: 5 },
+        { bioguide_id: "1510", name: "Nancy Fisher", party: "R", chamber: "House", state: "HI", trades_count: 4 },
+        { bioguide_id: "1511", name: "Nicholas Johnson", party: "D", chamber: "House", state: "ID", trades_count: 5 },
+        { bioguide_id: "1512", name: "Julie Parker", party: "D", chamber: "House", state: "IL", trades_count: 25 },
+        { bioguide_id: "1513", name: "Anthony Bennett", party: "R", chamber: "House", state: "IN", trades_count: 10 },
+        { bioguide_id: "1514", name: "Jennifer Morgan", party: "R", chamber: "House", state: "IA", trades_count: 10 },
+        { bioguide_id: "1515", name: "Jason Cooper", party: "D", chamber: "House", state: "KS", trades_count: 14 },
+        { bioguide_id: "1516", name: "Sandra Robinson", party: "R", chamber: "House", state: "KY", trades_count: 23 },
+        { bioguide_id: "1517", name: "Cynthia Barnes", party: "R", chamber: "House", state: "LA", trades_count: 25 },
+        { bioguide_id: "1518", name: "Donna Peterson", party: "D", chamber: "House", state: "ME", trades_count: 11 },
+        { bioguide_id: "1519", name: "Eric Sanders", party: "D", chamber: "House", state: "MD", trades_count: 23 },
+        { bioguide_id: "1520", name: "Emma Johnson", party: "D", chamber: "House", state: "MA", trades_count: 2 },
+        { bioguide_id: "1521", name: "Michael Jackson", party: "D", chamber: "House", state: "MI", trades_count: 10 },
+        { bioguide_id: "1522", name: "Janet Myers", party: "R", chamber: "House", state: "MN", trades_count: 20 },
+        { bioguide_id: "1523", name: "Gary Gutierrez", party: "D", chamber: "House", state: "MS", trades_count: 6 },
+        { bioguide_id: "1524", name: "Brandon Watson", party: "R", chamber: "House", state: "MO", trades_count: 23 },
+        { bioguide_id: "1525", name: "Richard Gomez", party: "R", chamber: "House", state: "MT", trades_count: 18 },
+        { bioguide_id: "1526", name: "Stephen Brooks", party: "R", chamber: "House", state: "NE", trades_count: 24 },
+        { bioguide_id: "1527", name: "Brian Ramirez", party: "D", chamber: "House", state: "NV", trades_count: 17 },
+        { bioguide_id: "1528", name: "Sandra Ortiz", party: "R", chamber: "House", state: "NH", trades_count: 20 },
+        { bioguide_id: "1529", name: "Sarah Nguyen", party: "D", chamber: "House", state: "NJ", trades_count: 6 },
+        { bioguide_id: "1530", name: "Elizabeth Smith", party: "R", chamber: "House", state: "NM", trades_count: 15 },
+        { bioguide_id: "1531", name: "Amanda Hughes", party: "R", chamber: "House", state: "NY", trades_count: 5 },
+        { bioguide_id: "1532", name: "Susan Morgan", party: "R", chamber: "House", state: "NC", trades_count: 16 },
+        { bioguide_id: "1533", name: "Ruth Martinez", party: "D", chamber: "House", state: "ND", trades_count: 14 },
+        { bioguide_id: "1534", name: "Patricia Cooper", party: "D", chamber: "House", state: "OH", trades_count: 5 },
+      ],
+      politicianTrades: {
+        "Nancy Pelosi": [
+          { ticker: "NVDA", name: "NVIDIA Corp", type: "purchase", amount: "$1M - $5M", date: "2024-12-15" },
+          { ticker: "GOOGL", name: "Alphabet Inc", type: "purchase", amount: "$500K - $1M", date: "2024-11-20" },
+          { ticker: "AAPL", name: "Apple Inc", type: "sale", amount: "$1M - $5M", date: "2024-10-05" },
+          { ticker: "TSLA", name: "Tesla Inc", type: "sale", amount: "$500K - $1M", date: "2024-09-15" },
+        ],
+        "Tommy Tuberville": [
+          { ticker: "MSFT", name: "Microsoft Corp", type: "purchase", amount: "$100K - $250K", date: "2024-12-10" },
+          { ticker: "AAPL", name: "Apple Inc", type: "sale", amount: "$50K - $100K", date: "2024-11-28" },
+          { ticker: "NVDA", name: "NVIDIA Corp", type: "purchase", amount: "$250K - $500K", date: "2024-11-15" },
+          { ticker: "META", name: "Meta Platforms", type: "sale", amount: "$100K - $250K", date: "2024-10-20" },
+        ],
+        "Dan Crenshaw": [
+          { ticker: "MSFT", name: "Microsoft Corp", type: "purchase", amount: "$50K - $100K", date: "2024-12-01" },
+          { ticker: "AMZN", name: "Amazon.com", type: "purchase", amount: "$100K - $250K", date: "2024-11-10" },
+          { ticker: "TSLA", name: "Tesla Inc", type: "sale", amount: "$50K - $100K", date: "2024-10-25" },
+        ],
+        "Josh Gottheimer": [
+          { ticker: "GOOGL", name: "Alphabet Inc", type: "purchase", amount: "$100K - $250K", date: "2024-12-05" },
+          { ticker: "META", name: "Meta Platforms", type: "sale", amount: "$50K - $100K", date: "2024-11-22" },
+          { ticker: "CRM", name: "Salesforce", type: "purchase", amount: "$50K - $100K", date: "2024-11-01" },
+        ],
+        "Michael McCaul": [
+          { ticker: "AAPL", name: "Apple Inc", type: "sale", amount: "$500K - $1M", date: "2024-12-08" },
+          { ticker: "NVDA", name: "NVIDIA Corp", type: "purchase", amount: "$250K - $500K", date: "2024-11-18" },
+          { ticker: "INTC", name: "Intel Corp", type: "purchase", amount: "$100K - $250K", date: "2024-10-30" },
+        ],
+        "Dianne Feinstein": [
+          { ticker: "AMZN", name: "Amazon.com", type: "purchase", amount: "$250K - $500K", date: "2024-12-02" },
+          { ticker: "GOOGL", name: "Alphabet Inc", type: "sale", amount: "$100K - $250K", date: "2024-11-15" },
+        ],
+        "Marco Rubio": [
+          { ticker: "CRM", name: "Salesforce", type: "purchase", amount: "$50K - $100K", date: "2024-11-28" },
+          { ticker: "TSLA", name: "Tesla Inc", type: "sale", amount: "$100K - $250K", date: "2024-11-10" },
+        ],
+        "French Hill": [
+          { ticker: "INTC", name: "Intel Corp", type: "purchase", amount: "$50K - $100K", date: "2024-12-01" },
+          { ticker: "GOOGL", name: "Alphabet Inc", type: "sale", amount: "$50K - $100K", date: "2024-11-20" },
+        ],
+      },
+      politicianHoldings: {
+        "Nancy Pelosi": [
+          { ticker: "NVDA", name: "NVIDIA Corp", value: 5000000 },
+          { ticker: "AAPL", name: "Apple Inc", value: 3500000 },
+          { ticker: "MSFT", name: "Microsoft Corp", value: 2500000 },
+          { ticker: "GOOGL", name: "Alphabet Inc", value: 2000000 },
+          { ticker: "AMZN", name: "Amazon.com", value: 1500000 },
+        ],
+        "Tommy Tuberville": [
+          { ticker: "MSFT", name: "Microsoft Corp", value: 500000 },
+          { ticker: "AAPL", name: "Apple Inc", value: 300000 },
+          { ticker: "NVDA", name: "NVIDIA Corp", value: 400000 },
+          { ticker: "INTC", name: "Intel Corp", value: 200000 },
+        ],
+        "Dan Crenshaw": [
+          { ticker: "NVDA", name: "NVIDIA Corp", value: 200000 },
+          { ticker: "MSFT", name: "Microsoft Corp", value: 150000 },
+          { ticker: "AMZN", name: "Amazon.com", value: 180000 },
+        ],
+        "Josh Gottheimer": [
+          { ticker: "GOOGL", name: "Alphabet Inc", value: 350000 },
+          { ticker: "AAPL", name: "Apple Inc", value: 200000 },
+          { ticker: "CRM", name: "Salesforce", value: 150000 },
+        ],
+        "Michael McCaul": [
+          { ticker: "NVDA", name: "NVIDIA Corp", value: 600000 },
+          { ticker: "MSFT", name: "Microsoft Corp", value: 400000 },
+          { ticker: "INTC", name: "Intel Corp", value: 300000 },
+        ],
+        "Dianne Feinstein": [
+          { ticker: "AAPL", name: "Apple Inc", value: 800000 },
+          { ticker: "AMZN", name: "Amazon.com", value: 600000 },
+          { ticker: "GOOGL", name: "Alphabet Inc", value: 400000 },
+        ],
+        "Marco Rubio": [
+          { ticker: "MSFT", name: "Microsoft Corp", value: 250000 },
+          { ticker: "CRM", name: "Salesforce", value: 180000 },
+        ],
+        "French Hill": [
+          { ticker: "INTC", name: "Intel Corp", value: 220000 },
+          { ticker: "AAPL", name: "Apple Inc", value: 180000 },
+        ],
+      },
+      networth: {
+        "P000197": { total_min: 117000000, total_max: 257000000, spouse: "Paul Pelosi", assets: [{ category: "Real Estate", description: "Napa Valley Vineyard", value_min: 5000000, value_max: 25000000 }, { category: "Stocks", description: "NVIDIA Corp", value_min: 5000000, value_max: 25000000 }], liabilities: [{ description: "Mortgage", value_min: 1000000, value_max: 5000000 }] },
+        "T000278": { total_min: 8000000, total_max: 25000000, assets: [{ category: "Real Estate", description: "Primary Residence", value_min: 1000000, value_max: 5000000 }], liabilities: [] },
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════════════════════════════
+    const api = {
+      async get(endpoint) {
+        try {
+          const r = await fetch(API + endpoint);
+          if (!r.ok) throw new Error();
+          return await r.json();
+        } catch { return null; }
+      }
+    };
+
+    const fmt = (v) => {
+      if (!v && v !== 0) return '$0';
+      if (v >= 1e12) return '$' + (v/1e12).toFixed(1) + 'T';
+      if (v >= 1e9) return '$' + (v/1e9).toFixed(1) + 'B';
+      if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+      if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+      return '$' + v.toLocaleString();
+    };
+    const fmtShares = (v) => v >= 1e9 ? (v/1e9).toFixed(1)+'B' : v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v;
+    const fmtRange = (min, max) => fmt(min) + ' – ' + fmt(max);
+    const initials = (n) => n ? n.split(' ').map(x => x[0]).join('').slice(0,2) : '??';
+
+    const Skeleton = ({ h = 60, n = 5 }) => (
+      <div style={{ padding: 20 }}>{Array(n).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: h, marginBottom: 12 }} />)}</div>
+    );
+
+    // ═══════════════════════════════════════════════════════════════
+    // AGGREGATE INSIGHTS (from sample data)
+    // ═══════════════════════════════════════════════════════════════
+    const aggregateInsights = () => {
+      const superinvestorBuys = {}, superinvestorSells = {}, superinvestorHoldings = {};
+      const politicianBuys = {}, politicianSells = {}, politicianHoldingsAgg = {};
+
+      Object.entries(SAMPLE.holdings).forEach(([investorName, holdings]) => {
+        holdings.forEach(h => {
+          if (!superinvestorHoldings[h.ticker]) superinvestorHoldings[h.ticker] = { ticker: h.ticker, name: h.name, investors: [], totalValue: 0 };
+          superinvestorHoldings[h.ticker].investors.push({ name: investorName, pct: h.pct, value: h.value });
+          superinvestorHoldings[h.ticker].totalValue += h.value;
+
+          if (h.activity === 'add' || h.activity === 'new') {
+            if (!superinvestorBuys[h.ticker]) superinvestorBuys[h.ticker] = { ticker: h.ticker, name: h.name, investors: [], totalValue: 0 };
+            superinvestorBuys[h.ticker].investors.push({ name: investorName, activityPct: h.activityPct, isNew: h.activity === 'new' });
+            superinvestorBuys[h.ticker].totalValue += h.value;
+          }
+          if (h.activity === 'reduce') {
+            if (!superinvestorSells[h.ticker]) superinvestorSells[h.ticker] = { ticker: h.ticker, name: h.name, investors: [], totalValue: 0 };
+            superinvestorSells[h.ticker].investors.push({ name: investorName, activityPct: h.activityPct });
+            superinvestorSells[h.ticker].totalValue += h.value;
+          }
+        });
+      });
+
+      Object.entries(SAMPLE.politicianTrades).forEach(([name, trades]) => {
+        const pol = SAMPLE.politicians.find(p => p.name === name);
+        trades.forEach(t => {
+          if (t.type === 'purchase') {
+            if (!politicianBuys[t.ticker]) politicianBuys[t.ticker] = { ticker: t.ticker, name: t.name, politicians: [], count: 0 };
+            politicianBuys[t.ticker].politicians.push({ name, party: pol?.party });
+            politicianBuys[t.ticker].count++;
+          }
+          if (t.type === 'sale') {
+            if (!politicianSells[t.ticker]) politicianSells[t.ticker] = { ticker: t.ticker, name: t.name, politicians: [], count: 0 };
+            politicianSells[t.ticker].politicians.push({ name, party: pol?.party });
+            politicianSells[t.ticker].count++;
+          }
+        });
+      });
+
+      Object.entries(SAMPLE.politicianHoldings).forEach(([name, holdings]) => {
+        const pol = SAMPLE.politicians.find(p => p.name === name);
+        holdings.forEach(h => {
+          if (!politicianHoldingsAgg[h.ticker]) politicianHoldingsAgg[h.ticker] = { ticker: h.ticker, name: h.name, politicians: [] };
+          politicianHoldingsAgg[h.ticker].politicians.push({ name, party: pol?.party, value: h.value });
+        });
+      });
+
+      return {
+        topSuperinvestorHoldings: Object.values(superinvestorHoldings).sort((a,b) => b.investors.length - a.investors.length).slice(0,5),
+        topSuperinvestorBuys: Object.values(superinvestorBuys).sort((a,b) => b.investors.length - a.investors.length).slice(0,5),
+        topSuperinvestorSells: Object.values(superinvestorSells).sort((a,b) => b.investors.length - a.investors.length).slice(0,5),
+        topPoliticianHoldings: Object.values(politicianHoldingsAgg).sort((a,b) => b.politicians.length - a.politicians.length).slice(0,5),
+        topPoliticianBuys: Object.values(politicianBuys).sort((a,b) => b.count - a.count).slice(0,5),
+        topPoliticianSells: Object.values(politicianSells).sort((a,b) => b.count - a.count).slice(0,5),
+      };
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // HEADER COMPONENT (Nume-inspired)
+    // ═══════════════════════════════════════════════════════════════
+    const Header = ({ onHome, status }) => (
+      <header style={{ 
+        background: 'var(--bg-secondary)', 
+        borderBottom: '1px solid var(--border-color)',
+        position: 'sticky', top: 0, zIndex: 100,
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+            <div style={{ 
+              width: 36, height: 36, borderRadius: 10, 
+              background: 'var(--bg-dark)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontWeight: 700, fontSize: 14, letterSpacing: '-0.5px'
+            }}>II</div>
+            <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>InvestorInsight</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ 
+              width: 7, height: 7, borderRadius: '50%', 
+              background: status === 'connected' ? 'var(--accent-teal)' : '#f59e0b',
+              animation: 'pulse 2s infinite'
+            }} />
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>
+              {status === 'connected' ? 'Live' : 'Sample Data'}
+            </span>
+          </div>
+        </div>
+      </header>
+    );
+
+    // ═══════════════════════════════════════════════════════════════
+    // NAVIGATION CARDS (Nume-inspired clean cards)
+    // ═══════════════════════════════════════════════════════════════
+    const Nav = ({ view, setView }) => (
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 32px 20px', display: 'flex', gap: 16 }}>
+        {[
+          { id: 'home', title: 'Market Insights', sub: 'Aggregated trends', icon: '📊', active: view === 'home' },
+          { id: 'superinvestors', title: 'Superinvestors', sub: 'SEC 13F filings', icon: '💼', active: view.includes('investor') },
+          { id: 'politicians', title: 'Congress', sub: 'STOCK Act disclosures', icon: '🏛️', active: view.includes('politician') }
+        ].map(t => (
+          <div key={t.id} onClick={() => setView(t.id)} style={{
+            flex: 1, padding: '20px 24px', borderRadius: 'var(--radius-lg)', cursor: 'pointer',
+            background: t.active ? 'var(--bg-dark)' : 'var(--bg-card)',
+            border: t.active ? 'none' : '1px solid var(--border-color)',
+            boxShadow: t.active ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
+            transition: 'all 0.2s ease',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ fontSize: 12, color: t.active ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)', marginBottom: 4, fontWeight: 500 }}>{t.sub}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: t.active ? 'white' : 'var(--text-primary)' }}>{t.title}</div>
+              </div>
+              <div style={{ fontSize: 32, opacity: t.active ? 1 : 0.8 }}>{t.icon}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+
+    // ═══════════════════════════════════════════════════════════════
+    // INSIGHTS DASHBOARD (with Top Holdings restored)
+    // ═══════════════════════════════════════════════════════════════
+    const InsightsDashboard = () => {
+      const insights = aggregateInsights();
+
+      const InsightCard = ({ title, icon, color, colorLight, data, type, variant }) => (
+        <div style={{
+          background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
+        }}>
+          <div style={{
+            padding: '14px 20px', borderBottom: '1px solid var(--border-light)',
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <span style={{ fontSize: 18 }}>{icon}</span>
+            <h3 style={{ fontSize: 14, fontWeight: 600, flex: 1, color: 'var(--text-primary)' }}>{title}</h3>
+            <span style={{
+              padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+              background: colorLight, color: color,
+            }}>{type === 'superinvestor' ? 'Superinvestors' : 'Congress'}</span>
+          </div>
+
+          {data.length > 0 ? data.map((item, i) => (
+            <div key={i} className="clickable-row" style={{
+              padding: '12px 20px', borderBottom: i < data.length - 1 ? '1px solid var(--border-light)' : 'none',
+              display: 'flex', alignItems: 'center', gap: 14,
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: 6, background: colorLight, color: color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12,
+              }}>{i + 1}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: color }}>{item.ticker}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {type === 'superinvestor' ? (
+                    variant === 'holdings' ? (
+                      item.investors.slice(0,2).map((inv, j) => <span key={j}>{inv.name} ({inv.pct.toFixed(0)}%){j < 1 && item.investors.length > 1 ? ', ' : ''}</span>)
+                    ) : (
+                      item.investors.slice(0,2).map((inv, j) => <span key={j}>{inv.name}{inv.isNew ? ' (New)' : ` +${inv.activityPct?.toFixed(0)}%`}{j < 1 && item.investors.length > 1 ? ', ' : ''}</span>)
+                    )
+                  ) : (
+                    item.politicians?.slice(0,2).map((pol, j) => (
+                      <span key={j} style={{ color: pol.party === 'D' ? 'var(--party-dem)' : 'var(--party-rep)' }}>
+                        {pol.name}{j < 1 && item.politicians.length > 1 ? ', ' : ''}
+                      </span>
+                    ))
+                  )}
+                  {((type === 'superinvestor' ? item.investors.length : item.politicians?.length) || 0) > 2 && (
+                    <span> +{(type === 'superinvestor' ? item.investors.length : item.politicians?.length) - 2} more</span>
+                  )}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {type === 'superinvestor' ? item.investors.length : (item.politicians?.length || item.count)}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {variant === 'holdings' ? (type === 'superinvestor' ? 'investors' : 'members') : (type === 'superinvestor' ? 'investors' : 'trades')}
+                </div>
+              </div>
+            </div>
+          )) : (
+            <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>No data</div>
+          )}
+        </div>
+      );
+
+      return (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              <span style={{ width: 8, height: 8, background: 'var(--accent-teal)', borderRadius: '50%', animation: 'pulse 2s infinite' }}></span>
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>Market Insights</h2>
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
+              Aggregated trading activity from superinvestors and congress members
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            {/* Left: Superinvestors */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <InsightCard title="Most Held by Superinvestors" icon="💼" color="var(--accent-blue)" colorLight="var(--accent-blue-light)" data={insights.topSuperinvestorHoldings} type="superinvestor" variant="holdings" />
+              <InsightCard title="Top Buys by Superinvestors" icon="📈" color="var(--accent-green)" colorLight="var(--accent-green-light)" data={insights.topSuperinvestorBuys} type="superinvestor" />
+              <InsightCard title="Top Sells by Superinvestors" icon="📉" color="var(--accent-red)" colorLight="var(--accent-red-light)" data={insights.topSuperinvestorSells} type="superinvestor" />
+            </div>
+            {/* Right: Politicians */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <InsightCard title="Most Held by Congress" icon="🏛️" color="var(--accent-purple)" colorLight="var(--accent-purple-light)" data={insights.topPoliticianHoldings} type="politician" variant="holdings" />
+              <InsightCard title="Top Buys by Congress" icon="📈" color="var(--accent-green)" colorLight="var(--accent-green-light)" data={insights.topPoliticianBuys} type="politician" />
+              <InsightCard title="Top Sells by Congress" icon="📉" color="var(--accent-red)" colorLight="var(--accent-red-light)" data={insights.topPoliticianSells} type="politician" />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // SUPERINVESTORS LIST
+    // ═══════════════════════════════════════════════════════════════
+    const SuperinvestorsList = ({ online, onSelect }) => {
+      const [list, setList] = useState(null);
+      const [search, setSearch] = useState('');
+
+      useEffect(() => {
+        (async () => {
+          const d = online ? await api.get('/api/superinvestors?limit=50') : null;
+          setList(d || SAMPLE.superinvestors);
+        })();
+      }, [online]);
+
+      if (!list) return <Skeleton n={8} />;
+      const filtered = list.filter(i => i.name.toLowerCase().includes(search.toLowerCase()) || i.firm.toLowerCase().includes(search.toLowerCase()));
+
+      return (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700 }}>Superinvestors</h2>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{filtered.length} investors</span>
+          </div>
+
+          <input
+            type="text" placeholder="Search investors..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%', padding: '12px 16px', marginBottom: 16, borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)', fontSize: 14, outline: 'none',
+              background: 'var(--bg-card)',
+            }}
+          />
+
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 40px', padding: '12px 20px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div>Investor</div><div style={{ textAlign: 'right' }}>Portfolio</div><div></div>
+            </div>
+            {filtered.map((inv, i) => (
+              <div key={inv.cik || i} onClick={() => onSelect(inv)} className="animate-slide clickable-row" style={{
+                display: 'grid', gridTemplateColumns: '1fr 130px 40px', padding: '14px 20px',
+                borderBottom: '1px solid var(--border-light)', alignItems: 'center',
+                animationDelay: i * 0.015 + 's',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, var(--accent-blue-light), var(--accent-purple-light))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: 13, color: 'var(--accent-blue)',
+                  }}>{initials(inv.name)}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)' }}>{inv.name}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{inv.firm}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', fontWeight: 700, fontSize: 15, color: 'var(--accent-teal)' }}>{fmt(inv.value || inv.total_value * 1000)}</div>
+                <div style={{ textAlign: 'right', color: 'var(--text-muted)', fontSize: 18 }}>→</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // INVESTOR DETAIL
+    // ═══════════════════════════════════════════════════════════════
+    const InvestorDetail = ({ investor, online, onBack }) => {
+      const [holdings, setHoldings] = useState(null);
+
+      useEffect(() => {
+        (async () => {
+          const d = online ? await api.get('/api/superinvestors/' + investor.cik) : null;
+          setHoldings(d?.holdings || SAMPLE.holdings[investor.name] || SAMPLE.holdings["Warren Buffett"]);
+        })();
+      }, [investor, online]);
+
+      return (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--accent-teal)', cursor: 'pointer', fontWeight: 600, fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>←</span> Back to Superinvestors
+          </button>
+
+          <div style={{
+            background: 'var(--bg-dark)', borderRadius: 'var(--radius-xl)', padding: 32,
+            color: 'white', marginBottom: 24, boxShadow: 'var(--shadow-lg)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700,
+              }}>{initials(investor.name)}</div>
+              <div>
+                <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{investor.name}</h1>
+                <div style={{ fontSize: 15, opacity: 0.8 }}>{investor.firm}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 48, marginTop: 28 }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Portfolio Value</div>
+                <div style={{ fontSize: 26, fontWeight: 700 }}>{fmt(investor.value || investor.total_value * 1000)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>Holdings</div>
+                <div style={{ fontSize: 26, fontWeight: 700 }}>{holdings?.length || '–'}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', fontWeight: 700, fontSize: 16, borderBottom: '1px solid var(--border-color)' }}>Holdings</div>
+            {!holdings ? <Skeleton n={6} h={50} /> : (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 80px 100px 100px', padding: '10px 20px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div>Ticker</div><div>Company</div><div style={{ textAlign: 'right' }}>%</div><div style={{ textAlign: 'right' }}>Shares</div><div style={{ textAlign: 'right' }}>Value</div>
+                </div>
+                {holdings.map((h, i) => (
+                  <div key={i} className="animate-slide" style={{
+                    display: 'grid', gridTemplateColumns: '80px 1fr 80px 100px 100px',
+                    padding: '14px 20px', borderBottom: '1px solid var(--border-light)', alignItems: 'center',
+                    animationDelay: i * 0.02 + 's',
+                  }}>
+                    <div style={{ fontWeight: 700, color: 'var(--accent-blue)' }}>{h.ticker}</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{h.name || h.issuer_name}</div>
+                    <div style={{ textAlign: 'right', fontWeight: 600 }}>{(h.pct || h.pct_portfolio || 0).toFixed(1)}%</div>
+                    <div style={{ textAlign: 'right', fontSize: 13, color: 'var(--text-secondary)' }}>{fmtShares(h.shares)}</div>
+                    <div style={{ textAlign: 'right', fontWeight: 600, color: 'var(--accent-teal)' }}>{fmt(h.value)}</div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // POLITICIANS LIST
+    // ═══════════════════════════════════════════════════════════════
+    const PoliticiansList = ({ online, onSelect }) => {
+      const [members, setMembers] = useState(null);
+      const [filter, setFilter] = useState({ party: '', chamber: '' });
+      const [search, setSearch] = useState('');
+
+      useEffect(() => {
+        (async () => {
+          const m = online ? await api.get('/api/congress/members') : null;
+          setMembers(m || SAMPLE.politicians);
+        })();
+      }, [online]);
+
+      if (!members) return <Skeleton n={8} />;
+      const filtered = members.filter(m => 
+        (!filter.party || m.party === filter.party) && 
+        (!filter.chamber || m.chamber === filter.chamber) &&
+        (!search || m.name.toLowerCase().includes(search.toLowerCase()) || m.state.toLowerCase().includes(search.toLowerCase()))
+      );
+
+      return (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700 }}>Congress Members</h2>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{filtered.length} members</span>
+          </div>
+
+          {/* Search and Filters */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <input
+              type="text" placeholder="Search members..." value={search} onChange={e => setSearch(e.target.value)}
+              style={{
+                flex: 1, padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)', fontSize: 14, outline: 'none',
+                background: 'var(--bg-card)',
+              }}
+            />
+            <select value={filter.party} onChange={e => setFilter(f => ({...f, party: e.target.value}))} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: 13, background: 'var(--bg-card)' }}>
+              <option value="">All Parties</option><option value="D">Democrat</option><option value="R">Republican</option>
+            </select>
+            <select value={filter.chamber} onChange={e => setFilter(f => ({...f, chamber: e.target.value}))} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: 13, background: 'var(--bg-card)' }}>
+              <option value="">All Chambers</option><option value="House">House</option><option value="Senate">Senate</option>
+            </select>
+          </div>
+
+          {/* Members List */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 90px 70px 40px', padding: '10px 20px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border-color)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div>Member</div><div style={{ textAlign: 'center' }}>Party</div><div style={{ textAlign: 'center' }}>Chamber</div><div style={{ textAlign: 'right' }}>Trades</div><div></div>
+            </div>
+            {filtered.map((m, i) => (
+              <div key={m.bioguide_id} onClick={() => onSelect(m)} className="animate-slide clickable-row" style={{
+                display: 'grid', gridTemplateColumns: '1fr 90px 90px 70px 40px',
+                padding: '14px 20px', borderBottom: '1px solid var(--border-light)', alignItems: 'center',
+                animationDelay: i * 0.015 + 's',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: m.party === 'D' ? 'var(--party-dem-light)' : m.party === 'R' ? 'var(--party-rep-light)' : 'var(--accent-purple-light)',
+                    color: m.party === 'D' ? 'var(--party-dem)' : m.party === 'R' ? 'var(--party-rep)' : 'var(--accent-purple)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 12,
+                  }}>{initials(m.name)}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{m.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.state}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{
+                    padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                    background: m.party === 'D' ? 'var(--party-dem-light)' : m.party === 'R' ? 'var(--party-rep-light)' : 'var(--accent-purple-light)',
+                    color: m.party === 'D' ? 'var(--party-dem)' : m.party === 'R' ? 'var(--party-rep)' : 'var(--accent-purple)',
+                  }}>{m.party === 'D' ? 'Dem' : m.party === 'R' ? 'Rep' : 'Ind'}</span>
+                </div>
+                <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>{m.chamber}</div>
+                <div style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)' }}>{m.trades_count || 0}</div>
+                <div style={{ textAlign: 'right', color: 'var(--text-muted)', fontSize: 18 }}>→</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // POLITICIAN DETAIL (with Net Worth)
+    // ═══════════════════════════════════════════════════════════════
+    const PoliticianDetail = ({ politician, online, onBack }) => {
+      const [tab, setTab] = useState('trades');
+      const [trades, setTrades] = useState(null);
+      const [nw, setNw] = useState(null);
+
+      useEffect(() => {
+        (async () => {
+          const [t, n] = online ? await Promise.all([
+            api.get('/api/congress/members/' + politician.bioguide_id + '/trades'),
+            api.get('/api/congress/members/' + politician.bioguide_id + '/networth')
+          ]) : [null, null];
+          
+          // Sample trades for this politician
+          const sampleTrades = (SAMPLE.politicianTrades[politician.name] || []).map(tr => ({
+            ticker: tr.ticker, asset_name: tr.name, transaction_type: tr.type === 'purchase' ? 'Purchase' : 'Sale',
+            amount_range: tr.amount, transaction_date: tr.date
+          }));
+          setTrades(t || sampleTrades);
+          setNw(n?.networth || SAMPLE.networth[politician.bioguide_id] || { total_min: 1000000, total_max: 5000000, assets: [{ category: 'Stocks', description: 'Various Holdings', value_min: 500000, value_max: 1000000 }], liabilities: [] });
+        })();
+      }, [politician, online]);
+
+      const partyGradient = politician.party === 'D' 
+        ? 'linear-gradient(135deg, #3b82f6, #1e40af)' 
+        : 'linear-gradient(135deg, #ef4444, #b91c1c)';
+
+      return (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--accent-teal)', cursor: 'pointer', fontWeight: 600, fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>←</span> Back to Congress
+          </button>
+
+          <div style={{
+            background: partyGradient, borderRadius: 'var(--radius-xl)', padding: 32,
+            color: 'white', marginBottom: 24, boxShadow: 'var(--shadow-lg)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700,
+              }}>{initials(politician.name)}</div>
+              <div>
+                <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{politician.name}</h1>
+                <div style={{ fontSize: 15, opacity: 0.9 }}>{politician.party === 'D' ? 'Democrat' : 'Republican'} · {politician.chamber} · {politician.state}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 48, marginTop: 28 }}>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>Est. Net Worth</div>
+                <div style={{ fontSize: 22, fontWeight: 700 }}>{nw ? fmtRange(nw.total_min, nw.total_max) : '–'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>Trades</div>
+                <div style={{ fontSize: 22, fontWeight: 700 }}>{trades?.length || politician.trades_count || 0}</div>
+              </div>
+              {nw?.spouse && (
+                <div>
+                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>Spouse</div>
+                  <div style={{ fontSize: 16, fontWeight: 600 }}>{nw.spouse}</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            {['trades', 'networth'].map(t => (
+              <button key={t} onClick={() => setTab(t)} style={{
+                padding: '10px 20px', borderRadius: 8,
+                border: tab === t ? '2px solid var(--accent-teal)' : '1px solid var(--border-color)',
+                background: tab === t ? 'var(--accent-teal-light)' : 'var(--bg-card)',
+                color: tab === t ? 'var(--accent-teal)' : 'var(--text-secondary)',
+                fontWeight: 600, cursor: 'pointer', fontSize: 13,
+              }}>{t === 'networth' ? 'Net Worth' : 'Trades'}</button>
+            ))}
+          </div>
+
+          {tab === 'trades' && (
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              {!trades ? <Skeleton n={5} /> : trades.length === 0 ? (
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No trades recorded</div>
+              ) : trades.map((t, i) => (
+                <div key={i} className="animate-slide" style={{
+                  display: 'flex', alignItems: 'center', padding: '14px 20px',
+                  borderBottom: '1px solid var(--border-light)', gap: 16,
+                  animationDelay: i * 0.02 + 's',
+                }}>
+                  <div style={{
+                    fontWeight: 700, fontSize: 16, minWidth: 60,
+                    color: t.transaction_type?.includes('Purchase') ? 'var(--accent-green)' : 'var(--accent-red)',
+                  }}>{t.ticker}</div>
+                  <div style={{ flex: 1, fontSize: 14, color: 'var(--text-secondary)' }}>{t.asset_name || t.ticker}</div>
+                  <span style={{
+                    padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                    background: t.transaction_type?.includes('Purchase') ? 'var(--accent-green-light)' : 'var(--accent-red-light)',
+                    color: t.transaction_type?.includes('Purchase') ? 'var(--accent-green)' : 'var(--accent-red)',
+                  }}>{t.transaction_type?.includes('Purchase') ? 'Buy' : 'Sell'}</span>
+                  <div style={{ fontSize: 13, minWidth: 100 }}>{t.amount_range}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t.transaction_date}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tab === 'networth' && nw && (
+            <div>
+              {/* Summary */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: 24, marginBottom: 20 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Total Assets</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent-green)' }}>{fmtRange(nw.total_min, nw.total_max)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Liabilities</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent-red)' }}>
+                      {nw.liabilities?.length ? fmtRange(nw.liabilities.reduce((s,l) => s + (l.value_min||0), 0), nw.liabilities.reduce((s,l) => s + (l.value_max||0), 0)) : '$0'}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Net Worth</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent-teal)' }}>{fmtRange(nw.total_min, nw.total_max)}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assets */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20 }}>
+                <div style={{ padding: '14px 20px', fontWeight: 700, borderBottom: '1px solid var(--border-color)' }}>Assets</div>
+                {nw.assets?.map((a, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border-light)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, background: 'var(--accent-blue-light)', color: 'var(--accent-blue)' }}>{a.category}</span>
+                      <span style={{ fontSize: 14 }}>{a.description}</span>
+                    </div>
+                    <div style={{ fontWeight: 600, color: 'var(--accent-green)' }}>{fmtRange(a.value_min, a.value_max)}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Liabilities */}
+              {nw.liabilities?.length > 0 && (
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20 }}>
+                  <div style={{ padding: '14px 20px', fontWeight: 700, borderBottom: '1px solid var(--border-color)' }}>Liabilities</div>
+                  {nw.liabilities.map((l, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border-light)' }}>
+                      <span style={{ fontSize: 14 }}>{l.description}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--accent-red)' }}>–{fmtRange(l.value_min, l.value_max)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ padding: 16, background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', fontSize: 12, color: 'var(--text-muted)' }}>
+                <strong>Disclaimer:</strong> Net worth estimates based on publicly available STOCK Act financial disclosure reports. Actual values may differ.
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // MAIN APP
+    // ═══════════════════════════════════════════════════════════════
+    const App = () => {
+      const [view, setView] = useState('home');
+      const [investor, setInvestor] = useState(null);
+      const [politician, setPolitician] = useState(null);
+      const [online, setOnline] = useState(false);
+
+      useEffect(() => { api.get('/').then(r => setOnline(r?.status === 'healthy')); }, []);
+
+      return (
+        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+          <Header onHome={() => { setView('home'); setInvestor(null); setPolitician(null); }} status={online ? 'connected' : 'offline'} />
+          <Nav view={view} setView={setView} />
+          {view === 'home' && <InsightsDashboard />}
+          {view === 'superinvestors' && <SuperinvestorsList online={online} onSelect={inv => { setInvestor(inv); setView('investor'); }} />}
+          {view === 'investor' && investor && <InvestorDetail investor={investor} online={online} onBack={() => setView('superinvestors')} />}
+          {view === 'politicians' && <PoliticiansList online={online} onSelect={p => { setPolitician(p); setView('politician'); }} />}
+          {view === 'politician' && politician && <PoliticianDetail politician={politician} online={online} onBack={() => setView('politicians')} />}
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

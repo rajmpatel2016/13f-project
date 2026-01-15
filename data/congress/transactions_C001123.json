@@ -1,0 +1,131 @@
+{
+  "member": {
+    "name": "Gilbert Cisneros",
+    "first_name": "Gilbert",
+    "last_name": "Cisneros",
+    "party": "D",
+    "chamber": "House",
+    "state": "CA",
+    "district": "31",
+    "committees": [
+      "Armed Services",
+      "Veterans' Affairs"
+    ],
+    "net_worth": "$68.2M",
+    "trades_2024": 120,
+    "volume_2024": "$4.2M"
+  },
+  "last_updated": "2026-01-15T14:49:41.590557",
+  "transactions": [
+    {
+      "member_id": "C001123",
+      "member_name": "Gilbert Cisneros",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2026-01-02",
+      "filing_date": "2026-02-16",
+      "ticker": "AVAV",
+      "asset_name": "AVAV - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Veterans' Affairs"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/26880/"
+    },
+    {
+      "member_id": "C001123",
+      "member_name": "Gilbert Cisneros",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-17",
+      "filing_date": "2026-01-20",
+      "ticker": "NFLX",
+      "asset_name": "NFLX - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Veterans' Affairs"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/77193/"
+    },
+    {
+      "member_id": "C001123",
+      "member_name": "Gilbert Cisneros",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-12",
+      "filing_date": "2025-12-23",
+      "ticker": "NOC",
+      "asset_name": "NOC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Veterans' Affairs"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/39494/"
+    },
+    {
+      "member_id": "C001123",
+      "member_name": "Gilbert Cisneros",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-29",
+      "filing_date": "2025-12-07",
+      "ticker": "WMT",
+      "asset_name": "WMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Veterans' Affairs"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/62307/"
+    },
+    {
+      "member_id": "C001123",
+      "member_name": "Gilbert Cisneros",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-28",
+      "filing_date": "2025-11-16",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Veterans' Affairs"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/85503/"
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "member": {
+    "name": "Mitch McConnell",
+    "first_name": "Mitch",
+    "last_name": "McConnell",
+    "party": "R",
+    "chamber": "Senate",
+    "state": "KY",
+    "district": null,
+    "committees": [
+      "Appropriations",
+      "Agriculture",
+      "Rules"
+    ],
+    "net_worth": "$35.2M",
+    "trades_2024": 8,
+    "volume_2024": "$450K"
+  },
+  "last_updated": "2026-01-15T14:49:41.609251",
+  "transactions": [
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-20",
+      "filing_date": "2026-01-07",
+      "ticker": "MSFT",
+      "asset_name": "MSFT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/28489/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-17",
+      "filing_date": "2026-01-06",
+      "ticker": "GOOGL",
+      "asset_name": "GOOGL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/44784/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-16",
+      "filing_date": "2025-12-22",
+      "ticker": "TSLA",
+      "asset_name": "TSLA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/99775/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-15",
+      "filing_date": "2026-01-04",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/60965/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-11",
+      "filing_date": "2026-01-20",
+      "ticker": "AMZN",
+      "asset_name": "AMZN - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/95649/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-12-04",
+      "filing_date": "2025-12-26",
+      "ticker": "AMZN",
+      "asset_name": "AMZN - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/36874/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-11-21",
+      "filing_date": "2025-12-01",
+      "ticker": "CRM",
+      "asset_name": "CRM - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Self",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/14679/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-11-03",
+      "filing_date": "2025-12-16",
+      "ticker": "NVDA",
+      "asset_name": "NVDA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/49154/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-11-02",
+      "filing_date": "2025-12-01",
+      "ticker": "PANW",
+      "asset_name": "PANW - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/42424/"
+    },
+    {
+      "member_id": "M000355",
+      "member_name": "Mitch McConnell",
+      "party": "R",
+      "chamber": "Senate",
+      "state": "KY",
+      "transaction_date": "2025-10-30",
+      "filing_date": "2025-11-06",
+      "ticker": "PANW",
+      "asset_name": "PANW - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Appropriations",
+        "Agriculture",
+        "Rules"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/53564/"
+    }
+  ]
+}

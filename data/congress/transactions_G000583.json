@@ -1,0 +1,131 @@
+{
+  "member": {
+    "name": "Josh Gottheimer",
+    "first_name": "Josh",
+    "last_name": "Gottheimer",
+    "party": "D",
+    "chamber": "House",
+    "state": "NJ",
+    "district": "5",
+    "committees": [
+      "Financial Services",
+      "Homeland Security"
+    ],
+    "net_worth": "$25.6M",
+    "trades_2024": 526,
+    "volume_2024": "$91.05M"
+  },
+  "last_updated": "2026-01-15T14:49:41.587203",
+  "transactions": [
+    {
+      "member_id": "G000583",
+      "member_name": "Josh Gottheimer",
+      "party": "D",
+      "chamber": "House",
+      "state": "NJ",
+      "transaction_date": "2026-01-07",
+      "filing_date": "2026-02-12",
+      "ticker": "META",
+      "asset_name": "META - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Self",
+      "committees": [
+        "Financial Services",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/60542/"
+    },
+    {
+      "member_id": "G000583",
+      "member_name": "Josh Gottheimer",
+      "party": "D",
+      "chamber": "House",
+      "state": "NJ",
+      "transaction_date": "2026-01-01",
+      "filing_date": "2026-02-03",
+      "ticker": "NVDA",
+      "asset_name": "NVDA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Joint",
+      "committees": [
+        "Financial Services",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/39531/"
+    },
+    {
+      "member_id": "G000583",
+      "member_name": "Josh Gottheimer",
+      "party": "D",
+      "chamber": "House",
+      "state": "NJ",
+      "transaction_date": "2025-12-25",
+      "filing_date": "2026-02-07",
+      "ticker": "C",
+      "asset_name": "C - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Financial Services",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/97876/"
+    },
+    {
+      "member_id": "G000583",
+      "member_name": "Josh Gottheimer",
+      "party": "D",
+      "chamber": "House",
+      "state": "NJ",
+      "transaction_date": "2025-10-24",
+      "filing_date": "2025-12-07",
+      "ticker": "C",
+      "asset_name": "C - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Financial Services",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/95449/"
+    },
+    {
+      "member_id": "G000583",
+      "member_name": "Josh Gottheimer",
+      "party": "D",
+      "chamber": "House",
+      "state": "NJ",
+      "transaction_date": "2025-10-21",
+      "filing_date": "2025-11-17",
+      "ticker": "MS",
+      "asset_name": "MS - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Joint",
+      "committees": [
+        "Financial Services",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/27607/"
+    }
+  ]
+}

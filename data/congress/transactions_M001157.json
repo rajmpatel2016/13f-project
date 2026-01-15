@@ -1,0 +1,307 @@
+{
+  "member": {
+    "name": "Michael McCaul",
+    "first_name": "Michael",
+    "last_name": "McCaul",
+    "party": "R",
+    "chamber": "House",
+    "state": "TX",
+    "district": "10",
+    "committees": [
+      "Foreign Affairs",
+      "Homeland Security"
+    ],
+    "net_worth": "$113.3M",
+    "trades_2024": 22,
+    "volume_2024": "$2.1M"
+  },
+  "last_updated": "2026-01-15T14:49:41.593560",
+  "transactions": [
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2026-01-06",
+      "filing_date": "2026-01-18",
+      "ticker": "TGT",
+      "asset_name": "TGT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/59603/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-12-14",
+      "filing_date": "2026-01-07",
+      "ticker": "TGT",
+      "asset_name": "TGT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/55213/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-12-07",
+      "filing_date": "2026-01-16",
+      "ticker": "NFLX",
+      "asset_name": "NFLX - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Joint",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/51129/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-12-07",
+      "filing_date": "2026-01-01",
+      "ticker": "HII",
+      "asset_name": "HII - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/83979/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-12-04",
+      "filing_date": "2025-12-28",
+      "ticker": "LMT",
+      "asset_name": "LMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/77010/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-12-04",
+      "filing_date": "2026-01-18",
+      "ticker": "LMT",
+      "asset_name": "LMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/73187/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-11-14",
+      "filing_date": "2025-12-29",
+      "ticker": "NOC",
+      "asset_name": "NOC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/71613/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-11-07",
+      "filing_date": "2025-12-14",
+      "ticker": "GD",
+      "asset_name": "GD - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/28944/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-11-07",
+      "filing_date": "2025-11-22",
+      "ticker": "AVAV",
+      "asset_name": "AVAV - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/88383/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-11-02",
+      "filing_date": "2025-11-20",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Joint",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/88968/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-10-25",
+      "filing_date": "2025-11-14",
+      "ticker": "HII",
+      "asset_name": "HII - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/99030/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-10-20",
+      "filing_date": "2025-12-01",
+      "ticker": "DIS",
+      "asset_name": "DIS - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/69399/"
+    },
+    {
+      "member_id": "M001157",
+      "member_name": "Michael McCaul",
+      "party": "R",
+      "chamber": "House",
+      "state": "TX",
+      "transaction_date": "2025-10-20",
+      "filing_date": "2025-11-22",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Foreign Affairs",
+        "Homeland Security"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/93342/"
+    }
+  ]
+}

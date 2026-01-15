@@ -1,0 +1,329 @@
+{
+  "member": {
+    "name": "Ro Khanna",
+    "first_name": "Ro",
+    "last_name": "Khanna",
+    "party": "D",
+    "chamber": "House",
+    "state": "CA",
+    "district": "17",
+    "committees": [
+      "Armed Services",
+      "Oversight"
+    ],
+    "net_worth": "$27.8M",
+    "trades_2024": 18,
+    "volume_2024": "$1.5M"
+  },
+  "last_updated": "2026-01-15T14:49:41.607591",
+  "transactions": [
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2026-01-12",
+      "filing_date": "2026-02-03",
+      "ticker": "NOC",
+      "asset_name": "NOC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/16542/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2026-01-09",
+      "filing_date": "2026-01-14",
+      "ticker": "BA",
+      "asset_name": "BA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/18431/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-28",
+      "filing_date": "2026-01-14",
+      "ticker": "AVAV",
+      "asset_name": "AVAV - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/58130/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-25",
+      "filing_date": "2026-01-19",
+      "ticker": "HII",
+      "asset_name": "HII - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/95099/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-21",
+      "filing_date": "2026-01-10",
+      "ticker": "HII",
+      "asset_name": "HII - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/29880/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-18",
+      "filing_date": "2025-12-28",
+      "ticker": "AAPL",
+      "asset_name": "AAPL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/92111/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-08",
+      "filing_date": "2025-12-30",
+      "ticker": "NKE",
+      "asset_name": "NKE - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/11582/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-25",
+      "filing_date": "2025-12-30",
+      "ticker": "AVAV",
+      "asset_name": "AVAV - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Joint",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/58991/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-19",
+      "filing_date": "2025-12-18",
+      "ticker": "NOC",
+      "asset_name": "NOC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Joint",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/53530/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-14",
+      "filing_date": "2025-12-06",
+      "ticker": "COST",
+      "asset_name": "COST - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/45219/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-05",
+      "filing_date": "2025-11-24",
+      "ticker": "RTX",
+      "asset_name": "RTX - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/18018/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-27",
+      "filing_date": "2025-12-03",
+      "ticker": "WMT",
+      "asset_name": "WMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/70701/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-27",
+      "filing_date": "2025-12-07",
+      "ticker": "WMT",
+      "asset_name": "WMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Spouse",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/88677/"
+    },
+    {
+      "member_id": "K000389",
+      "member_name": "Ro Khanna",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-23",
+      "filing_date": "2025-10-28",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Armed Services",
+        "Oversight"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/24050/"
+    }
+  ]
+}

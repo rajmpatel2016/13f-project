@@ -1,0 +1,293 @@
+{
+  "member": {
+    "name": "Nancy Pelosi",
+    "first_name": "Nancy",
+    "last_name": "Pelosi",
+    "party": "D",
+    "chamber": "House",
+    "state": "CA",
+    "district": "11",
+    "committees": [
+      "Intelligence"
+    ],
+    "net_worth": "$272.5M",
+    "trades_2024": 17,
+    "volume_2024": "$37.75M"
+  },
+  "last_updated": "2026-01-15T14:49:41.585093",
+  "transactions": [
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2026-01-07",
+      "filing_date": "2026-02-05",
+      "ticker": "CRM",
+      "asset_name": "CRM - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Self",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/24045/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-30",
+      "filing_date": "2026-01-07",
+      "ticker": "MSFT",
+      "asset_name": "MSFT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Self",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/15259/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-30",
+      "filing_date": "2026-01-22",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Self",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/97715/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-25",
+      "filing_date": "2026-01-21",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/69873/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-12-17",
+      "filing_date": "2026-01-09",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/81696/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-22",
+      "filing_date": "2025-12-26",
+      "ticker": "AMD",
+      "asset_name": "AMD - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/30405/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-17",
+      "filing_date": "2025-12-07",
+      "ticker": "NFLX",
+      "asset_name": "NFLX - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/76612/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-13",
+      "filing_date": "2025-12-26",
+      "ticker": "MSFT",
+      "asset_name": "MSFT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/69588/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-05",
+      "filing_date": "2025-12-12",
+      "ticker": "META",
+      "asset_name": "META - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/40728/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-11-03",
+      "filing_date": "2025-11-18",
+      "ticker": "AVGO",
+      "asset_name": "AVGO - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/88796/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-23",
+      "filing_date": "2025-10-28",
+      "ticker": "PLTR",
+      "asset_name": "PLTR - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$500,001 - $1,000,000",
+      "amount_min": 500001,
+      "amount_max": 1000000,
+      "owner": "Spouse",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/78990/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-19",
+      "filing_date": "2025-11-01",
+      "ticker": "NVDA",
+      "asset_name": "NVDA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/34102/"
+    },
+    {
+      "member_id": "P000197",
+      "member_name": "Nancy Pelosi",
+      "party": "D",
+      "chamber": "House",
+      "state": "CA",
+      "transaction_date": "2025-10-18",
+      "filing_date": "2025-11-14",
+      "ticker": "AMZN",
+      "asset_name": "AMZN - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Intelligence"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/39785/"
+    }
+  ]
+}

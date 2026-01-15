@@ -1,0 +1,356 @@
+{
+  "member": {
+    "name": "Suzan DelBene",
+    "first_name": "Suzan",
+    "last_name": "DelBene",
+    "party": "D",
+    "chamber": "House",
+    "state": "WA",
+    "district": "1",
+    "committees": [
+      "Ways & Means"
+    ],
+    "net_worth": "$79.4M",
+    "trades_2024": 33,
+    "volume_2024": "$2.8M"
+  },
+  "last_updated": "2026-01-15T14:49:41.604685",
+  "transactions": [
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2026-01-01",
+      "filing_date": "2026-01-24",
+      "ticker": "GOOGL",
+      "asset_name": "GOOGL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/94725/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-12-14",
+      "filing_date": "2025-12-20",
+      "ticker": "PANW",
+      "asset_name": "PANW - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/73997/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-12-11",
+      "filing_date": "2025-12-18",
+      "ticker": "WMT",
+      "asset_name": "WMT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/78122/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-29",
+      "filing_date": "2025-12-06",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/74981/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-29",
+      "filing_date": "2025-12-25",
+      "ticker": "DIS",
+      "asset_name": "DIS - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$15,001 - $50,000",
+      "amount_min": 15001,
+      "amount_max": 50000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/68186/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-26",
+      "filing_date": "2025-12-30",
+      "ticker": "TSLA",
+      "asset_name": "TSLA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Full)",
+      "amount_range": "$1,001 - $15,000",
+      "amount_min": 1001,
+      "amount_max": 15000,
+      "owner": "Self",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/18860/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-23",
+      "filing_date": "2026-01-03",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/61874/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-15",
+      "filing_date": "2025-12-23",
+      "ticker": "NVDA",
+      "asset_name": "NVDA - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/13767/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-14",
+      "filing_date": "2025-12-10",
+      "ticker": "META",
+      "asset_name": "META - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/11908/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-09",
+      "filing_date": "2025-12-14",
+      "ticker": "CRM",
+      "asset_name": "CRM - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/75370/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-03",
+      "filing_date": "2025-12-14",
+      "ticker": "AMD",
+      "asset_name": "AMD - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$1,000,001 - $5,000,000",
+      "amount_min": 1000001,
+      "amount_max": 5000000,
+      "owner": "Self",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/68995/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-11-02",
+      "filing_date": "2025-11-20",
+      "ticker": "ORCL",
+      "asset_name": "ORCL - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$250,001 - $500,000",
+      "amount_min": 250001,
+      "amount_max": 500000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/78765/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-10-31",
+      "filing_date": "2025-12-01",
+      "ticker": "NFLX",
+      "asset_name": "NFLX - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/14883/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-10-30",
+      "filing_date": "2025-11-19",
+      "ticker": "INTC",
+      "asset_name": "INTC - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Purchase",
+      "amount_range": "$50,001 - $100,000",
+      "amount_min": 50001,
+      "amount_max": 100000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/87444/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-10-30",
+      "filing_date": "2025-12-06",
+      "ticker": "MSFT",
+      "asset_name": "MSFT - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Joint",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/21097/"
+    },
+    {
+      "member_id": "D000617",
+      "member_name": "Suzan DelBene",
+      "party": "D",
+      "chamber": "House",
+      "state": "WA",
+      "transaction_date": "2025-10-24",
+      "filing_date": "2025-11-28",
+      "ticker": "AVGO",
+      "asset_name": "AVGO - Common Stock",
+      "asset_type": "Stock",
+      "transaction_type": "Sale (Partial)",
+      "amount_range": "$100,001 - $250,000",
+      "amount_min": 100001,
+      "amount_max": 250000,
+      "owner": "Spouse",
+      "committees": [
+        "Ways & Means"
+      ],
+      "filing_url": "https://efdsearch.senate.gov/search/view/paper/30386/"
+    }
+  ]
+}
