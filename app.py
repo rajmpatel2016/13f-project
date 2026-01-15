@@ -32,3 +32,16 @@ def get_superinvestors():
 @app.get("/api/congress/members")
 def get_congress():
     return CONGRESS
+
+@app.get("/api/test-scraper")
+def test_scraper():
+    try:
+        from scrapers.sec_13f_scraper import SEC13FScraper
+        return {"status": "ok", "message": "Scraper imported successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+```
+
+Commit, wait for redeploy, then visit:
+```
+https://13f-project-production.up.railway.app/api/test-scraper
