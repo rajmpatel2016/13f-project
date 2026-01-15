@@ -46,6 +46,54 @@ def test_sec():
         return {"status": "error", "message": str(e)}
 
 
+@app.get("/api/debug-filing")
+def debug_filing():
+    """See what files are in Buffett's latest 13F filing"""
+    import re
+    try:
+        headers = {"User-Agent": "InvestorInsight test@test.com"}
+        
+        # Get latest filing info
+        url = "https://data.sec.gov/submissions/CIK0001067983.json"
+        r = requests.get(url, headers=headers, timeout=10)
+        data = r.json()
+        
+        # Find latest 13F-HR
+        filings = data.get("filings", {}).get("recent", {})
+        forms = filings.get("form", [])
+        accessions = filings.get("accessionNumber", [])
+        
+        latest_13f = None
+        for i, form in enumerate(forms):
+            if "13F-HR" in form:
+                latest_13f = accessions[i]
+                break
+        
+        if not latest_13f:
+            return {"status": "error", "message": "No 13F found"}
+        
+        # Get filing index page
+        acc_formatted = latest_13f.replace("-", "")
+        index_url = f"https://www.sec.gov/Archives/edgar/data/1067983/{acc_formatted}/"
+        
+        r2 = requests.get(index_url, headers=headers, timeout=10)
+        
+        # Find all XML files
+        xml_files = re.findall(r'href="([^"]+\.xml)"', r2.text, re.IGNORECASE)
+        all_files = re.findall(r'href="([^"]+)"', r2.text)
+        
+        return {
+            "status": "ok",
+            "accession": latest_13f,
+            "index_url": index_url,
+            "xml_files": xml_files,
+            "all_files": [f for f in all_files if not f.startswith("?") and not f.startswith("/")]
+        }
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
+
+
 @app.get("/api/test-scraper")
 def test_scraper(cik: str = "1067983"):
     try:
@@ -59,7 +107,6 @@ def test_scraper(cik: str = "1067983"):
             }
         
         scraper = SEC13FScraper(data_dir="./data/13f")
-        
         filings = scraper.get_cik_filings(cik, "13F-HR")
         
         if not filings:
@@ -98,5 +145,3 @@ def test_scraper(cik: str = "1067983"):
     except Exception as e:
         import traceback
         return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
