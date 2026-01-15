@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import requests
 
 app = FastAPI(title="InvestorInsight API")
 
@@ -33,10 +34,13 @@ def get_superinvestors():
 def get_congress():
     return CONGRESS
 
-@app.get("/api/test-scraper")
-def test_scraper():
+@app.get("/api/test-sec")
+def test_sec():
     try:
-        from scrapers.sec_13f_scraper import SEC13FScraper
-        return {"status": "ok", "message": "Scraper imported successfully"}
+        url = "https://data.sec.gov/submissions/CIK0001067983.json"
+        headers = {"User-Agent": "InvestorInsight test@test.com"}
+        r = requests.get(url, headers=headers, timeout=10)
+        data = r.json()
+        return {"status": "ok", "name": data.get("name"), "cik": data.get("cik")}
     except Exception as e:
         return {"status": "error", "message": str(e)}
