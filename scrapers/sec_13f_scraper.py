@@ -357,7 +357,13 @@ class SEC13FScraper:
                 all_xml = re.findall(xml_pattern, response.text, re.IGNORECASE)
                 matches = [x for x in all_xml if 'primary_doc' not in x.lower()]
             
-            if not matches:
+           if not matches:
+                # Try any XML that's not primary_doc
+                xml_pattern = r'href="([^"]+\.xml)"'
+                all_xml = re.findall(xml_pattern, response.text, re.IGNORECASE)
+                matches = [x for x in all_xml if 'primary_doc' not in x.lower()] 
+               
+        if not matches:
                 logger.warning(f"No info table found for {accession_number}")
                 return None
             
