@@ -40,8 +40,3 @@ def test_scraper():
         return {"status": "ok", "message": "Scraper imported successfully"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-```
-
-Commit, wait for redeploy, then visit:
-```
-https://13f-project-production.up.railway.app/api/test-scraper
