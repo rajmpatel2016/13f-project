@@ -24,7 +24,7 @@ CONGRESS = [
 
 @app.get("/")
 def root():
-    return {"name": "InvestorInsight API", "status": "online"}
+    return {"name": "InvestorInsight API", "status": "online", "version": "NEW123"}
 
 @app.get("/api/superinvestors")
 def get_superinvestors():
