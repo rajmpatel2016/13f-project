@@ -1,18 +1,14 @@
 """
 SEC 13F Filing Scraper for InvestorInsight
 Scrapes 13F-HR filings from SEC EDGAR to track superinvestor holdings.
-
-13F filings are required quarterly from institutional investment managers
-with >$100M AUM. Filed within 45 days of quarter end.
 """
 
 import requests
 import json
 import time
 import re
-import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
 from pathlib import Path
 import logging
@@ -20,146 +16,112 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# SEC EDGAR API endpoints
 SEC_EDGAR_BASE = "https://www.sec.gov"
-SEC_EDGAR_SEARCH = "https://efts.sec.gov/LATEST/search-index"
 SEC_EDGAR_SUBMISSIONS = "https://data.sec.gov/submissions"
-SEC_EDGAR_ARCHIVES = "https://www.sec.gov/cgi-bin/browse-edgar"
 
-# Required headers for SEC EDGAR (they require user-agent identification)
 HEADERS = {
     "User-Agent": "InvestorInsight Research Bot (contact@investorinsight.com)",
     "Accept-Encoding": "gzip, deflate",
     "Accept": "application/json, text/html, application/xml"
 }
 
-# List of superinvestors to track (CIK numbers)
+# 78 Superinvestors (matching Dataroma)
 SUPERINVESTORS = {
-    "1067983": {
-        "name": "Warren Buffett",
-        "firm": "Berkshire Hathaway Inc",
-        "cik": "1067983"
-    },
-    "1079114": {
-        "name": "David Einhorn",
-        "firm": "Greenlight Capital Inc",
-        "cik": "1079114"
-    },
-    "1336528": {
-        "name": "Bill Ackman",
-        "firm": "Pershing Square Capital Management",
-        "cik": "1336528"
-    },
-    "1061768": {
-        "name": "Seth Klarman",
-        "firm": "Baupost Group LLC",
-        "cik": "1061768"
-    },
-    "921669": {
-        "name": "Carl Icahn",
-        "firm": "Icahn Capital LP",
-        "cik": "921669"
-    },
-    "1649339": {
-        "name": "Michael Burry",
-        "firm": "Scion Asset Management LLC",
-        "cik": "1649339"
-    },
-    "949509": {
-        "name": "Howard Marks",
-        "firm": "Oaktree Capital Management LP",
-        "cik": "949509"
-    },
-    "1510387": {
-        "name": "Joel Greenblatt",
-        "firm": "Gotham Asset Management LLC",
-        "cik": "1510387"
-    },
-    "1173334": {
-        "name": "Mohnish Pabrai",
-        "firm": "Pabrai Investment Funds",
-        "cik": "1173334"
-    },
-    "1350694": {
-        "name": "Ray Dalio",
-        "firm": "Bridgewater Associates LP",
-        "cik": "1350694"
-    },
-    "1656456": {
-        "name": "David Tepper",
-        "firm": "Appaloosa Management LP",
-        "cik": "1656456"
-    },
-    "1167483": {
-        "name": "Chase Coleman",
-        "firm": "Tiger Global Management LLC",
-        "cik": "1167483"
-    },
-    "1536411": {
-        "name": "Stanley Druckenmiller",
-        "firm": "Duquesne Family Office LLC",
-        "cik": "1536411"
-    },
-    "1040273": {
-        "name": "Dan Loeb",
-        "firm": "Third Point LLC",
-        "cik": "1040273"
-    },
-    "1345471": {
-        "name": "Nelson Peltz",
-        "firm": "Trian Fund Management LP",
-        "cik": "1345471"
-    },
-    "1048445": {
-        "name": "Paul Singer",
-        "firm": "Elliott Investment Management LP",
-        "cik": "1048445"
-    },
-    "1657335": {
-        "name": "Leon Cooperman",
-        "firm": "Omega Advisors Inc",
-        "cik": "1657335"
-    },
-    "1647251": {
-        "name": "Chris Hohn",
-        "firm": "TCI Fund Management Ltd",
-        "cik": "1647251"
-    },
-    "1802994": {
-        "name": "Jeffrey Ubben",
-        "firm": "Inclusive Capital Partners LP",
-        "cik": "1802994"
-    },
-    "1569205": {
-        "name": "Terry Smith",
-        "firm": "Fundsmith LLP",
-        "cik": "1569205"
-    },
-    "1709323": {
-        "name": "Li Lu",
-        "firm": "Himalaya Capital Management LLC",
-        "cik": "1709323"
-    },
-    "1549341": {
-        "name": "Guy Spier",
-        "firm": "Aquamarine Capital Management LLC",
-        "cik": "1549341"
-    },
-    "1096343": {
-        "name": "Tom Gayner",
-        "firm": "Markel Corporation",
-        "cik": "1096343"
-    },
-    "1112520": {
-        "name": "Chuck Akre",
-        "firm": "Akre Capital Management LLC",
-        "cik": "1112520"
-    },
-    "1766596": {
-        "name": "Pat Dorsey",
-        "firm": "Dorsey Asset Management LLC",
-        "cik": "1766596"
-    },
+    # Legendary Value Investors
+    "1067983": {"name": "Warren Buffett", "firm": "Berkshire Hathaway Inc"},
+    "1336528": {"name": "Bill Ackman", "firm": "Pershing Square Capital Management"},
+    "1649339": {"name": "Michael Burry", "firm": "Scion Asset Management LLC"},
+    "1061768": {"name": "Seth Klarman", "firm": "Baupost Group LLC"},
+    "1040273": {"name": "Daniel Loeb", "firm": "Third Point LLC"},
+    "1345471": {"name": "Nelson Peltz", "firm": "Trian Fund Management LP"},
+    "1709323": {"name": "Li Lu", "firm": "Himalaya Capital Management LLC"},
+    "1173334": {"name": "Mohnish Pabrai", "firm": "Pabrai Investment Funds"},
+    "1549341": {"name": "Guy Spier", "firm": "Aquamarine Capital Management LLC"},
+    "921669": {"name": "Carl Icahn", "firm": "Icahn Capital LP"},
+    "1079114": {"name": "David Einhorn", "firm": "Greenlight Capital Inc"},
+    "1656456": {"name": "David Tepper", "firm": "Appaloosa Management LP"},
+    
+    # Large Fund Managers
+    "1647251": {"name": "Chris Hohn", "firm": "TCI Fund Management Ltd"},
+    "1167483": {"name": "Chase Coleman", "firm": "Tiger Global Management LLC"},
+    "1350694": {"name": "Ray Dalio", "firm": "Bridgewater Associates LP"},
+    "1510387": {"name": "Joel Greenblatt", "firm": "Gotham Asset Management LLC"},
+    "1096343": {"name": "Tom Gayner", "firm": "Markel Corporation"},
+    "1112520": {"name": "Chuck Akre", "firm": "Akre Capital Management LLC"},
+    "1766596": {"name": "Pat Dorsey", "firm": "Dorsey Asset Management LLC"},
+    "1802994": {"name": "Jeffrey Ubben", "firm": "Inclusive Capital Partners LP"},
+    "1657335": {"name": "Leon Cooperman", "firm": "Omega Advisors Inc"},
+    "1536411": {"name": "Stanley Druckenmiller", "firm": "Duquesne Family Office LLC"},
+    "1048445": {"name": "Paul Singer", "firm": "Elliott Investment Management LP"},
+    "1569205": {"name": "Terry Smith", "firm": "Fundsmith LLP"},
+    "949509": {"name": "Howard Marks", "firm": "Oaktree Capital Management LP"},
+    
+    # Institutional Investors
+    "1618584": {"name": "Bill & Melinda Gates Foundation", "firm": "Gates Foundation Trust"},
+    "315066": {"name": "Dodge & Cox", "firm": "Dodge & Cox"},
+    "1000275": {"name": "First Eagle Investment", "firm": "First Eagle Investment Management"},
+    "1279708": {"name": "Polen Capital", "firm": "Polen Capital Management"},
+    
+    # Value Investors
+    "1568820": {"name": "AKO Capital", "firm": "AKO Capital LLP"},
+    "1537996": {"name": "AltaRock Partners", "firm": "AltaRock Partners"},
+    "1547230": {"name": "Bill Miller", "firm": "Miller Value Partners"},
+    "908809": {"name": "Bill Nygren", "firm": "Oakmark Select Fund"},
+    "1056831": {"name": "Bruce Berkowitz", "firm": "Fairholme Capital"},
+    "1772460": {"name": "Bryan Lawrence", "firm": "Oakcliff Capital"},
+    "1455099": {"name": "Charles Bobrinskoy", "firm": "Ariel Focus Fund"},
+    "1008540": {"name": "Christopher Bloomstran", "firm": "Semper Augustus"},
+    "816345": {"name": "Christopher Davis", "firm": "Davis Advisors"},
+    "1766199": {"name": "Clifford Sosin", "firm": "CAS Investment Partners"},
+    "1512613": {"name": "David Abrams", "firm": "Abrams Capital Management"},
+    "1576280": {"name": "David Katz", "firm": "Matrix Asset Advisors"},
+    "1033896": {"name": "David Rolfe", "firm": "Wedgewood Partners"},
+    "1697189": {"name": "Dennis Hong", "firm": "ShawSpring Partners"},
+    "1715541": {"name": "Duan Yongping", "firm": "H&H International Investment"},
+    "927855": {"name": "Francis Chou", "firm": "Chou Associates"},
+    "1105838": {"name": "Francois Rochon", "firm": "Giverny Capital"},
+    "1132439": {"name": "Glenn Greenberg", "firm": "Brave Warrior Advisors"},
+    "1571047": {"name": "Glenn Welling", "firm": "Engaged Capital"},
+    "1536253": {"name": "Greenhaven Associates", "firm": "Greenhaven Associates"},
+    "1650274": {"name": "Greg Alexander", "firm": "Conifer Management"},
+    "1045446": {"name": "Harry Burn", "firm": "Sound Shore"},
+    "1714475": {"name": "Hillman Value Fund", "firm": "Hillman Capital Management"},
+    "1001045": {"name": "Jensen Investment", "firm": "Jensen Investment Management"},
+    "1438809": {"name": "John Armitage", "firm": "Egerton Capital"},
+    "924245": {"name": "John Rogers", "firm": "Ariel Appreciation Fund"},
+    "1758311": {"name": "Josh Tarasoff", "firm": "Greenlea Lane Capital"},
+    "920153": {"name": "Kahn Brothers", "firm": "Kahn Brothers Group"},
+    "916340": {"name": "Lee Ainslie", "firm": "Maverick Capital"},
+    "1533333": {"name": "Lindsell Train", "firm": "Lindsell Train"},
+    "855266": {"name": "Mairs & Power", "firm": "Mairs & Power Growth Fund"},
+    "806343": {"name": "Mason Hawkins", "firm": "Longleaf Partners"},
+    "1108131": {"name": "Meridian Contrarian Fund", "firm": "Meridian Fund"},
+    "1603432": {"name": "Norbert Lou", "firm": "Punch Card Management"},
+    "1026630": {"name": "Prem Watsa", "firm": "Fairfax Financial Holdings"},
+    "1008634": {"name": "Richard Pzena", "firm": "Pzena Investment Management"},
+    "732263": {"name": "Robert Olstein", "firm": "Olstein Capital Management"},
+    "1559832": {"name": "Robert Vinall", "firm": "RV Capital GmbH"},
+    "353011": {"name": "Ruane Cunniff", "firm": "Sequoia Fund"},
+    "1639061": {"name": "Samantha McLemore", "firm": "Patient Capital Management"},
+    "1082475": {"name": "Sarah Ketterer", "firm": "Causeway Capital Management"},
+    "1040199": {"name": "Stephen Mandel", "firm": "Lone Pine Capital"},
+    "1045102": {"name": "Steven Romick", "firm": "FPA Crescent Fund"},
+    "919065": {"name": "Third Avenue Management", "firm": "Third Avenue Management"},
+    "1141360": {"name": "Thomas Russo", "firm": "Gardner Russo & Quinn"},
+    "1710176": {"name": "Tom Bancroft", "firm": "Makaira Partners"},
+    "1568489": {"name": "Alex Roepers", "firm": "Atlantic Investment Management"},
+    "1697085": {"name": "FPA Queens Road", "firm": "FPA Queens Road Small Cap Value"},
+}
+
+# CUSIP to ticker mapping
+CUSIP_TO_TICKER = {
+    "037833": "AAPL", "02079K": "GOOGL", "02079L": "GOOG", "594918": "MSFT",
+    "023135": "AMZN", "30303M": "META", "67066G": "NVDA", "88160R": "TSLA",
+    "084670": "BRK.B", "060505": "BAC", "46625H": "JPM", "92826C": "V",
+    "478160": "JNJ", "931142": "WMT", "742718": "PG", "88579Y": "MA",
+    "172967": "C", "254687": "DIS", "459200": "IBM", "713448": "PEP",
+    "191216": "KO", "166764": "CVX", "30231G": "XOM", "882508": "TXN",
+    "69608A": "PLTR", "717081": "PFE", "406216": "HAL", "550021": "LULU",
 }
 
 
@@ -177,6 +139,7 @@ class Holding:
     voting_authority_none: int
     ticker: Optional[str] = None
     pct_portfolio: Optional[float] = None
+    put_call: Optional[str] = None
 
 
 @dataclass
@@ -201,35 +164,8 @@ class SEC13FScraper:
     def __init__(self, data_dir: str = "./data"):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.cusip_to_ticker = self._load_cusip_mapping()
+        self.cusip_to_ticker = CUSIP_TO_TICKER
         
-    def _load_cusip_mapping(self) -> Dict[str, str]:
-        return {
-            "037833": "AAPL",
-            "02079K": "GOOGL",
-            "02079L": "GOOG",
-            "594918": "MSFT",
-            "023135": "AMZN",
-            "30303M": "META",
-            "67066G": "NVDA",
-            "88160R": "TSLA",
-            "084670": "BRK.B",
-            "060505": "BAC",
-            "46625H": "JPM",
-            "92826C": "V",
-            "478160": "JNJ",
-            "931142": "WMT",
-            "742718": "PG",
-            "88579Y": "MA",
-            "172967": "C",
-            "254687": "DIS",
-            "459200": "IBM",
-            "713448": "PEP",
-            "191216": "KO",
-            "166764": "CVX",
-            "30231G": "XOM",
-        }
-    
     def _rate_limit(self):
         time.sleep(0.15)
     
@@ -271,7 +207,6 @@ class SEC13FScraper:
     
     def get_13f_holdings(self, cik: str, accession_number: str) -> Optional[List[Holding]]:
         accession_formatted = accession_number.replace("-", "")
-        cik_padded = cik.zfill(10)
         index_url = f"{SEC_EDGAR_BASE}/Archives/edgar/data/{cik}/{accession_formatted}/"
         
         try:
@@ -281,10 +216,6 @@ class SEC13FScraper:
             
             xml_pattern = r'href="([^"]*infotable[^"]*\.xml)"'
             matches = re.findall(xml_pattern, response.text, re.IGNORECASE)
-            
-            if not matches:
-                xml_pattern = r'href="([^"]*form13f[^"]*\.xml)"'
-                matches = re.findall(xml_pattern, response.text, re.IGNORECASE)
             
             if not matches:
                 xml_pattern = r'href="([^"]+\.xml)"'
@@ -328,6 +259,7 @@ class SEC13FScraper:
             value_match = re.search(r'<value>([^<]+)</value>', table)
             shares_match = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
             share_type_match = re.search(r'<sshPrnamtType>([^<]+)</sshPrnamtType>', table)
+            putcall_match = re.search(r'<putCall>([^<]+)</putCall>', table)
             discretion_match = re.search(r'<investmentDiscretion>([^<]+)</investmentDiscretion>', table)
             sole_match = re.search(r'<Sole>([^<]+)</Sole>', table)
             shared_match = re.search(r'<Shared>([^<]+)</Shared>', table)
@@ -346,7 +278,8 @@ class SEC13FScraper:
                 voting_authority_sole=int(sole_match.group(1)) if sole_match else 0,
                 voting_authority_shared=int(shared_match.group(1)) if shared_match else 0,
                 voting_authority_none=int(none_match.group(1)) if none_match else 0,
-                ticker=ticker
+                ticker=ticker,
+                put_call=putcall_match.group(1) if putcall_match else None
             ))
         
         return holdings
@@ -401,48 +334,12 @@ class SEC13FScraper:
                 return f"{year}-12-31"
         except ValueError:
             return filing_date
-    
-    def scrape_all_superinvestors(self) -> Dict[str, Filing13F]:
-        results = {}
-        
-        for cik, info in SUPERINVESTORS.items():
-            try:
-                filing = self.scrape_investor(cik, info)
-                if filing:
-                    results[cik] = filing
-                    self._save_filing(filing)
-            except Exception as e:
-                logger.error(f"Error scraping {info['name']}: {e}")
-                continue
-        
-        self._save_all_filings(results)
-        return results
-    
-    def _save_filing(self, filing: Filing13F):
-        filename = f"13f_{filing.cik}_{filing.filing_date}.json"
-        filepath = self.data_dir / filename
-        
-        with open(filepath, 'w') as f:
-            json.dump(filing.to_dict(), f, indent=2)
-        
-        logger.info(f"Saved filing to {filepath}")
-    
-    def _save_all_filings(self, filings: Dict[str, Filing13F]):
-        filepath = self.data_dir / "superinvestor_holdings.json"
-        
-        data = {
-            "last_updated": datetime.now().isoformat(),
-            "filings": {cik: f.to_dict() for cik, f in filings.items()}
-        }
-        
-        with open(filepath, 'w') as f:
-            json.dump(data, f, indent=2)
-        
-        logger.info(f"Saved all filings to {filepath}")
 
 
 def main():
     scraper = SEC13FScraper(data_dir="./data/13f")
+    print(f"Total superinvestors: {len(SUPERINVESTORS)}")
+    
     burry = scraper.scrape_investor("1649339", SUPERINVESTORS["1649339"])
     if burry:
         print(f"\n{burry.investor_name} - {burry.firm_name}")
@@ -451,7 +348,8 @@ def main():
         print(f"\nTop 10 Holdings:")
         for h in burry.holdings[:10]:
             ticker = h.ticker or h.cusip[:6]
-            print(f"  {ticker}: ${h.value:,} ({h.pct_portfolio}%)")
+            putcall = f" ({h.put_call.upper()})" if h.put_call else ""
+            print(f"  {ticker}{putcall}: ${h.value:,} ({h.pct_portfolio}%)")
 
 
 if __name__ == "__main__":
