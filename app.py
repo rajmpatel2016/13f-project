@@ -15,7 +15,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"name": "InvestorInsight API", "status": "online", "version": "v4"}
+    return {"name": "InvestorInsight API", "status": "online", "version": "v5"}
 
 @app.get("/api/debug-parse")
 def debug_parse():
@@ -27,9 +27,10 @@ def debug_parse():
         r = requests.get(xml_url, headers=headers, timeout=15)
         xml_content = r.text
         
-        # Remove namespaces
+        # Remove ALL namespace stuff
         xml_clean = re.sub(r'\sxmlns[^=]*="[^"]*"', '', xml_content)
-        xml_clean = re.sub(r'<(/?)(\w+):', r'<\1', xml_clean)
+        xml_clean = re.sub(r'\sxsi:[^=]*="[^"]*"', '', xml_clean)
+        xml_clean = re.sub(r'<(/?)[\w]+:', r'<\1', xml_clean)
         
         root = ET.fromstring(xml_clean)
         
@@ -40,7 +41,6 @@ def debug_parse():
         holdings = []
         for elem in root.iter():
             if elem.tag.lower() == 'infotable':
-                # Try to extract data
                 cusip = None
                 name = None
                 value = None
