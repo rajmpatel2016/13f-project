@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
@@ -7,7 +7,6 @@ import time
 from datetime import datetime
 import requests
 
-# Import the full list from scraper
 from scrapers.sec_13f_scraper import SUPERINVESTORS, CUSIP_TO_TICKER
 
 app = FastAPI(title="InvestorInsight API")
@@ -20,7 +19,7 @@ app.add_middleware(
 )
 
 CACHE_FILE = "./data/cache.json"
-CACHE = {"investors": [], "details": {}, "last_updated": None}
+CACHE = {"investors": [], "details": {}, "last_updated": None, "refresh_status": "idle", "refresh_progress": 0}
 
 HEADERS = {
     "User-Agent": "InvestorInsight Research Bot (contact@investorinsight.com)",
@@ -43,7 +42,13 @@ load_cache()
 
 @app.get("/")
 def root():
-    return {"status": "healthy", "last_updated": CACHE.get("last_updated"), "total_investors": len(SUPERINVESTORS)}
+    return {
+        "status": "healthy",
+        "last_updated": CACHE.get("last_updated"),
+        "cached_investors": len(CACHE.get("investors", [])),
+        "refresh_status": CACHE.get("refresh_status", "idle"),
+        "refresh_progress": CACHE.get("refresh_progress", 0)
+    }
 
 @app.get("/api/superinvestors")
 def get_superinvestors():
@@ -55,127 +60,138 @@ def get_superinvestors():
 def get_superinvestor(cik: str):
     if cik in CACHE["details"]:
         return CACHE["details"][cik]
-    return {"error": "Not found. Call /api/refresh first."}
+    return {"error": "Not found"}
 
-@app.get("/api/refresh")
-def refresh_data():
-    investors = []
-    details = {}
-    failed = []
+def scrape_one(cik: str, info: dict):
+    try:
+        cik_padded = cik.zfill(10)
+        time.sleep(0.12)
+        r = requests.get(f"https://data.sec.gov/submissions/CIK{cik_padded}.json", headers=HEADERS, timeout=8)
+        if r.status_code != 200:
+            return None
+        data = r.json()
+        recent = data.get("filings", {}).get("recent", {})
+        if not recent:
+            return None
+        
+        forms = recent.get("form", [])
+        accessions = recent.get("accessionNumber", [])
+        dates = recent.get("filingDate", [])
+        
+        idx = next((i for i, f in enumerate(forms) if f in ["13F-HR", "13F-HR/A"]), None)
+        if idx is None:
+            return None
+        
+        acc = accessions[idx].replace("-", "")
+        index_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/"
+        
+        time.sleep(0.12)
+        r = requests.get(index_url, headers=HEADERS, timeout=8)
+        matches = re.findall(r'href="([^"]*infotable[^"]*\.xml)"', r.text, re.IGNORECASE)
+        if not matches:
+            matches = [x for x in re.findall(r'href="([^"]+\.xml)"', r.text, re.IGNORECASE) if 'primary_doc' not in x.lower()]
+        if not matches:
+            return None
+        
+        xml_url = f"https://www.sec.gov{matches[0]}" if matches[0].startswith('/') else f"{index_url}{matches[0]}"
+        
+        time.sleep(0.12)
+        xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
+        
+        holdings = []
+        for table in re.findall(r'<infoTable>(.*?)</infoTable>', xml, re.DOTALL):
+            cm = re.search(r'<cusip>([^<]+)</cusip>', table)
+            if not cm:
+                continue
+            cusip = cm.group(1)
+            nm = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
+            vm = re.search(r'<value>([^<]+)</value>', table)
+            sm = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
+            pm = re.search(r'<putCall>([^<]+)</putCall>', table)
+            
+            name = nm.group(1) if nm else ""
+            if pm:
+                name = f"{name} ({pm.group(1).upper()})"
+            
+            holdings.append({
+                "ticker": CUSIP_TO_TICKER.get(cusip[:6]) or cusip[:6],
+                "name": name,
+                "value": int(vm.group(1)) if vm else 0,
+                "shares": int(sm.group(1)) if sm else 0,
+            })
+        
+        if not holdings:
+            return None
+        
+        total = sum(h["value"] for h in holdings)
+        for h in holdings:
+            h["pct"] = round((h["value"] / total) * 100, 2) if total > 0 else 0
+        holdings.sort(key=lambda x: x["value"], reverse=True)
+        
+        return {"cik": cik, "name": info["name"], "firm": info["firm"], "value": total, "filing_date": dates[idx], "holdings": holdings}
+    except:
+        return None
+
+def do_full_refresh():
+    """Background task to refresh all investors"""
+    global CACHE
+    CACHE["refresh_status"] = "running"
+    CACHE["refresh_progress"] = 0
+    save_cache()
+    
+    total = len(SUPERINVESTORS)
+    done = 0
     
     for cik, info in SUPERINVESTORS.items():
-        try:
-            # Get filings list
-            cik_padded = cik.zfill(10)
-            url = f"https://data.sec.gov/submissions/CIK{cik_padded}.json"
-            
-            time.sleep(0.15)
-            response = requests.get(url, headers=HEADERS, timeout=15)
-            if response.status_code != 200:
-                failed.append({"cik": cik, "name": info["name"], "reason": "CIK not found"})
-                continue
-                
-            data = response.json()
-            recent = data.get("filings", {}).get("recent", {})
-            
-            if not recent:
-                failed.append({"cik": cik, "name": info["name"], "reason": "No filings"})
-                continue
-            
-            # Find 13F filing
-            forms = recent.get("form", [])
-            accessions = recent.get("accessionNumber", [])
-            dates = recent.get("filingDate", [])
-            
-            filing_idx = None
-            for i, form in enumerate(forms):
-                if form == "13F-HR" or form == "13F-HR/A":
-                    filing_idx = i
-                    break
-            
-            if filing_idx is None:
-                failed.append({"cik": cik, "name": info["name"], "reason": "No 13F filing"})
-                continue
-            
-            accession = accessions[filing_idx].replace("-", "")
-            filing_date = dates[filing_idx]
-            index_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/"
-            
-            time.sleep(0.15)
-            response = requests.get(index_url, headers=HEADERS, timeout=15)
-            xml_pattern = r'href="([^"]*infotable[^"]*\.xml)"'
-            matches = re.findall(xml_pattern, response.text, re.IGNORECASE)
-            
-            if not matches:
-                xml_pattern = r'href="([^"]+\.xml)"'
-                all_xml = re.findall(xml_pattern, response.text, re.IGNORECASE)
-                matches = [x for x in all_xml if 'primary_doc' not in x.lower()]
-            
-            if not matches:
-                failed.append({"cik": cik, "name": info["name"], "reason": "No XML file"})
-                continue
-            
-            xml_file = matches[0]
-            if xml_file.startswith('/'):
-                xml_url = f"https://www.sec.gov{xml_file}"
-            else:
-                xml_url = f"{index_url}{xml_file}"
-            
-            time.sleep(0.15)
-            xml_response = requests.get(xml_url, headers=HEADERS, timeout=15)
-            xml_content = xml_response.text
-            
-            holdings = []
-            info_tables = re.findall(r'<infoTable>(.*?)</infoTable>', xml_content, re.DOTALL)
-            
-            for table in info_tables:
-                cusip_match = re.search(r'<cusip>([^<]+)</cusip>', table)
-                if not cusip_match:
-                    continue
-                
-                cusip = cusip_match.group(1)
-                name_match = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
-                value_match = re.search(r'<value>([^<]+)</value>', table)
-                shares_match = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
-                putcall_match = re.search(r'<putCall>([^<]+)</putCall>', table)
-                
-                name = name_match.group(1) if name_match else ""
-                putcall = putcall_match.group(1).upper() if putcall_match else ""
-                if putcall:
-                    name = f"{name} ({putcall})"
-                
-                ticker = CUSIP_TO_TICKER.get(cusip[:6]) or cusip[:6]
-                
-                holdings.append({
-                    "ticker": ticker,
-                    "name": name,
-                    "value": int(value_match.group(1)) if value_match else 0,
-                    "shares": int(shares_match.group(1)) if shares_match else 0,
-                })
-            
-            if not holdings:
-                failed.append({"cik": cik, "name": info["name"], "reason": "No holdings parsed"})
-                continue
-            
-            total_value = sum(h["value"] for h in holdings)
-            for h in holdings:
-                h["pct"] = round((h["value"] / total_value) * 100, 2) if total_value > 0 else 0
-            
-            holdings.sort(key=lambda x: x["value"], reverse=True)
-            
-            investors.append({
-                "cik": cik,
-                "name": info["name"],
-                "firm": info["firm"],
-                "value": total_value,
-                "filing_date": filing_date
-            })
-            
-            details[cik] = {
-                "cik": cik,
-                "name": info["name"],
-                "firm": info["firm"],
-                "value": total_value,
-                "filing_date": filing_date,
-                "holdings": holdings
-            }
+        result = scrape_one(cik, info)
+        if result:
+            CACHE["details"][cik] = result
+        done += 1
+        CACHE["refresh_progress"] = int((done / total) * 100)
+        
+        # Save every 10 investors
+        if done % 10 == 0:
+            CACHE["investors"] = sorted(
+                [{"cik": k, "name": v["name"], "firm": v["firm"], "value": v["value"], "filing_date": v["filing_date"]} 
+                 for k, v in CACHE["details"].items()],
+                key=lambda x: x["value"], reverse=True
+            )
+            save_cache()
+    
+    # Final save
+    CACHE["investors"] = sorted(
+        [{"cik": k, "name": v["name"], "firm": v["firm"], "value": v["value"], "filing_date": v["filing_date"]} 
+         for k, v in CACHE["details"].items()],
+        key=lambda x: x["value"], reverse=True
+    )
+    CACHE["last_updated"] = datetime.now().isoformat()
+    CACHE["refresh_status"] = "complete"
+    CACHE["refresh_progress"] = 100
+    save_cache()
+
+@app.get("/api/refresh")
+def refresh_data(background_tasks: BackgroundTasks):
+    """Start background refresh of all investors"""
+    if CACHE.get("refresh_status") == "running":
+        return {
+            "status": "already_running",
+            "progress": CACHE.get("refresh_progress", 0)
+        }
+    
+    background_tasks.add_task(do_full_refresh)
+    
+    return {
+        "status": "started",
+        "message": "Refresh started in background. Check / or /api/status for progress.",
+        "total_investors": len(SUPERINVESTORS)
+    }
+
+@app.get("/api/status")
+def get_status():
+    """Check refresh progress"""
+    return {
+        "refresh_status": CACHE.get("refresh_status", "idle"),
+        "refresh_progress": CACHE.get("refresh_progress", 0),
+        "cached_investors": len(CACHE.get("investors", [])),
+        "last_updated": CACHE.get("last_updated")
+    }
