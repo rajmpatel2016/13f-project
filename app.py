@@ -14,42 +14,46 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"name": "InvestorInsight API", "status": "online", "version": "v6"}
+    return {"name": "InvestorInsight API", "status": "online", "version": "v7"}
 
-@app.get("/api/debug-parse")
-def debug_parse():
-    """Parse XML with regex instead of ElementTree"""
+@app.get("/api/test-scraper")
+def test_scraper(cik: str = "1649339"):
     try:
-        headers = {"User-Agent": "InvestorInsight test@test.com"}
-        xml_url = "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml"
+        from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
         
-        r = requests.get(xml_url, headers=headers, timeout=15)
-        xml_content = r.text
+        if cik not in SUPERINVESTORS:
+            return {"status": "error", "message": f"CIK {cik} not tracked"}
         
-        # Use regex to extract holdings directly
-        holdings = []
+        scraper = SEC13FScraper(data_dir="./data/13f")
+        filings = scraper.get_cik_filings(cik, "13F-HR")
         
-        # Find all infoTable blocks
-        info_tables = re.findall(r'<infoTable>(.*?)</infoTable>', xml_content, re.DOTALL)
+        if not filings:
+            return {"status": "error", "message": "No 13F filings found"}
         
-        for table in info_tables:
-            cusip = re.search(r'<cusip>([^<]+)</cusip>', table)
-            name = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
-            value = re.search(r'<value>([^<]+)</value>', table)
-            shares = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
-            
-            if cusip:
-                holdings.append({
-                    "cusip": cusip.group(1),
-                    "name": name.group(1) if name else None,
-                    "value": int(value.group(1)) if value else 0,
-                    "shares": int(shares.group(1)) if shares else 0
-                })
+        latest = filings[0]
+        holdings = scraper.get_13f_holdings(cik, latest["accession_number"])
+        
+        if not holdings:
+            return {"status": "partial", "message": "Found filing but couldn't parse holdings", "filing": latest}
+        
+        total_value = sum(h.value for h in holdings)
+        for h in holdings:
+            if total_value > 0:
+                h.pct_portfolio = round((h.value / total_value) * 100, 2)
+        
+        holdings.sort(key=lambda x: x.value, reverse=True)
         
         return {
-            "status": "ok",
-            "holdings_found": len(holdings),
-            "holdings": holdings
+            "status": "success",
+            "investor": SUPERINVESTORS[cik]["name"],
+            "firm": SUPERINVESTORS[cik]["firm"],
+            "filing_date": latest["filing_date"],
+            "total_value": total_value,
+            "positions": len(holdings),
+            "top_5": [
+                {"ticker": h.ticker or h.cusip[:6], "name": h.issuer_name, "value": h.value, "pct": h.pct_portfolio}
+                for h in holdings[:5]
+            ]
         }
     except Exception as e:
         import traceback
