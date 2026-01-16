@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import re
+import xml.etree.ElementTree as ET
 
 app = FastAPI(title="InvestorInsight API")
 
@@ -14,7 +15,55 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"name": "InvestorInsight API", "status": "online", "version": "v3"}
+    return {"name": "InvestorInsight API", "status": "online", "version": "v4"}
+
+@app.get("/api/debug-parse")
+def debug_parse():
+    """Test XML parsing directly"""
+    try:
+        headers = {"User-Agent": "InvestorInsight test@test.com"}
+        xml_url = "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml"
+        
+        r = requests.get(xml_url, headers=headers, timeout=15)
+        xml_content = r.text
+        
+        # Remove namespaces
+        xml_clean = re.sub(r'\sxmlns[^=]*="[^"]*"', '', xml_content)
+        xml_clean = re.sub(r'<(/?)(\w+):', r'<\1', xml_clean)
+        
+        root = ET.fromstring(xml_clean)
+        
+        # Find all tags
+        all_tags = [elem.tag for elem in root.iter()]
+        
+        # Try to find infoTable entries
+        holdings = []
+        for elem in root.iter():
+            if elem.tag.lower() == 'infotable':
+                # Try to extract data
+                cusip = None
+                name = None
+                value = None
+                for child in elem.iter():
+                    if 'cusip' in child.tag.lower():
+                        cusip = child.text
+                    if 'nameofissuer' in child.tag.lower():
+                        name = child.text
+                    if child.tag.lower() == 'value':
+                        value = child.text
+                if cusip:
+                    holdings.append({"cusip": cusip, "name": name, "value": value})
+        
+        return {
+            "status": "ok",
+            "total_tags": len(all_tags),
+            "unique_tags": list(set(all_tags)),
+            "holdings_found": len(holdings),
+            "first_3_holdings": holdings[:3]
+        }
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
 
 @app.get("/api/test-scraper")
 def test_scraper(cik: str = "1649339"):
