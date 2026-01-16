@@ -318,11 +318,14 @@ class SEC13FScraper:
         holdings = []
         
         try:
-            xml_content = re.sub(r'xmlns[^"]*"[^"]*"', '', xml_content)
+            # Remove all namespace declarations and prefixes
+            xml_content = re.sub(r'\sxmlns[^=]*="[^"]*"', '', xml_content)
+            xml_content = re.sub(r'<(/?)(\w+):', r'<\1', xml_content)
             root = ET.fromstring(xml_content)
             
             for info_table in root.iter():
-                if 'infotable' in info_table.tag.lower():
+                tag_lower = info_table.tag.lower()
+                if tag_lower == 'infotable' or tag_lower.endswith('}infotable'):
                     holding = self._parse_info_table_entry(info_table)
                     if holding:
                         holdings.append(holding)
