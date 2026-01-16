@@ -54,6 +54,30 @@ def get_superinvestor(cik: str):
         return CACHE["details"][cik]
     return {"error": "Not found. Call /api/refresh first."}
 
+@app.get("/api/debug-putcall")
+def debug_putcall():
+    """Check if putCall is in the XML"""
+    xml_url = "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml"
+    response = requests.get(xml_url, headers=HEADERS, timeout=15)
+    xml_content = response.text
+    
+    # Find all putCall tags
+    putcalls = re.findall(r'<putCall>([^<]+)</putCall>', xml_content)
+    
+    # Find one infoTable with putCall
+    info_tables = re.findall(r'<infoTable>(.*?)</infoTable>', xml_content, re.DOTALL)
+    sample_with_putcall = None
+    for table in info_tables:
+        if '<putCall>' in table:
+            sample_with_putcall = table[:500]
+            break
+    
+    return {
+        "putcalls_found": putcalls,
+        "total_info_tables": len(info_tables),
+        "sample_with_putcall": sample_with_putcall
+    }
+
 @app.get("/api/refresh")
 def refresh_data():
     from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
