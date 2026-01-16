@@ -165,7 +165,6 @@ SUPERINVESTORS = {
 
 @dataclass
 class Holding:
-    """Represents a single stock holding from a 13F filing"""
     cusip: str
     issuer_name: str
     class_title: str
@@ -182,7 +181,6 @@ class Holding:
 
 @dataclass
 class Filing13F:
-    """Represents a complete 13F-HR filing"""
     cik: str
     accession_number: str
     filing_date: str
@@ -281,7 +279,6 @@ class SEC13FScraper:
             response = requests.get(index_url, headers=HEADERS)
             response.raise_for_status()
             
-            # Find the infotable XML file
             xml_pattern = r'href="([^"]*infotable[^"]*\.xml)"'
             matches = re.findall(xml_pattern, response.text, re.IGNORECASE)
             
@@ -317,58 +314,42 @@ class SEC13FScraper:
     def _parse_13f_xml(self, xml_content: str) -> List[Holding]:
         holdings = []
         
-        try:
-            # Remove all namespace declarations and prefixes
-            xml_content = re.sub(r'\sxmlns[^=]*="[^"]*"', '', xml_content)
-            xml_content = re.sub(r'<(/?)(\w+):', r'<\1', xml_content)
-            root = ET.fromstring(xml_content)
+        info_tables = re.findall(r'<infoTable>(.*?)</infoTable>', xml_content, re.DOTALL)
+        
+        for table in info_tables:
+            cusip_match = re.search(r'<cusip>([^<]+)</cusip>', table)
+            if not cusip_match:
+                continue
+                
+            cusip = cusip_match.group(1)
             
-            for info_table in root.iter():
-                tag_lower = info_table.tag.lower()
-                if tag_lower == 'infotable' or tag_lower.endswith('}infotable'):
-                    holding = self._parse_info_table_entry(info_table)
-                    if holding:
-                        holdings.append(holding)
-                        
-        except ET.ParseError as e:
-            logger.error(f"XML parse error: {e}")
+            name_match = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
+            title_match = re.search(r'<titleOfClass>([^<]+)</titleOfClass>', table)
+            value_match = re.search(r'<value>([^<]+)</value>', table)
+            shares_match = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
+            share_type_match = re.search(r'<sshPrnamtType>([^<]+)</sshPrnamtType>', table)
+            discretion_match = re.search(r'<investmentDiscretion>([^<]+)</investmentDiscretion>', table)
+            sole_match = re.search(r'<Sole>([^<]+)</Sole>', table)
+            shared_match = re.search(r'<Shared>([^<]+)</Shared>', table)
+            none_match = re.search(r'<None>([^<]+)</None>', table)
             
+            ticker = self.cusip_to_ticker.get(cusip[:6])
+            
+            holdings.append(Holding(
+                cusip=cusip,
+                issuer_name=name_match.group(1) if name_match else "",
+                class_title=title_match.group(1) if title_match else "",
+                value=int(value_match.group(1)) if value_match else 0,
+                shares=int(shares_match.group(1)) if shares_match else 0,
+                share_type=share_type_match.group(1) if share_type_match else "SH",
+                investment_discretion=discretion_match.group(1) if discretion_match else "SOLE",
+                voting_authority_sole=int(sole_match.group(1)) if sole_match else 0,
+                voting_authority_shared=int(shared_match.group(1)) if shared_match else 0,
+                voting_authority_none=int(none_match.group(1)) if none_match else 0,
+                ticker=ticker
+            ))
+        
         return holdings
-    
-    def _parse_info_table_entry(self, entry: ET.Element) -> Optional[Holding]:
-        def get_text(elem: ET.Element, *tags: str) -> str:
-            for tag in tags:
-                for child in elem.iter():
-                    if tag.lower() in child.tag.lower():
-                        return child.text or ""
-            return ""
-        
-        def get_int(elem: ET.Element, *tags: str) -> int:
-            text = get_text(elem, *tags)
-            try:
-                return int(text.replace(",", ""))
-            except ValueError:
-                return 0
-        
-        cusip = get_text(entry, "cusip")
-        if not cusip:
-            return None
-            
-        ticker = self.cusip_to_ticker.get(cusip[:6])
-        
-        return Holding(
-            cusip=cusip,
-            issuer_name=get_text(entry, "nameofissuer", "issuer"),
-            class_title=get_text(entry, "titleofclass", "class"),
-            value=get_int(entry, "value"),
-            shares=get_int(entry, "sshprnamt", "shares"),
-            share_type=get_text(entry, "sshprnamttype", "type") or "SH",
-            investment_discretion=get_text(entry, "investmentdiscretion", "discretion") or "SOLE",
-            voting_authority_sole=get_int(entry, "sole"),
-            voting_authority_shared=get_int(entry, "shared"),
-            voting_authority_none=get_int(entry, "none"),
-            ticker=ticker
-        )
     
     def scrape_investor(self, cik: str, investor_info: Dict) -> Optional[Filing13F]:
         logger.info(f"Scraping 13F for {investor_info['name']} (CIK: {cik})")
@@ -462,15 +443,15 @@ class SEC13FScraper:
 
 def main():
     scraper = SEC13FScraper(data_dir="./data/13f")
-    buffett = scraper.scrape_investor("1067983", SUPERINVESTORS["1067983"])
-    if buffett:
-        print(f"\n{buffett.investor_name} - {buffett.firm_name}")
-        print(f"Filing Date: {buffett.filing_date}")
-        print(f"Total Value: ${buffett.total_value:,}K")
+    burry = scraper.scrape_investor("1649339", SUPERINVESTORS["1649339"])
+    if burry:
+        print(f"\n{burry.investor_name} - {burry.firm_name}")
+        print(f"Filing Date: {burry.filing_date}")
+        print(f"Total Value: ${burry.total_value:,}")
         print(f"\nTop 10 Holdings:")
-        for h in buffett.holdings[:10]:
+        for h in burry.holdings[:10]:
             ticker = h.ticker or h.cusip[:6]
-            print(f"  {ticker}: ${h.value:,}K ({h.pct_portfolio}%)")
+            print(f"  {ticker}: ${h.value:,} ({h.pct_portfolio}%)")
 
 
 if __name__ == "__main__":
