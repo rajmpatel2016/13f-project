@@ -7,6 +7,9 @@ import time
 from datetime import datetime
 import requests
 
+# Import the full list from scraper
+from scrapers.sec_13f_scraper import SUPERINVESTORS, CUSIP_TO_TICKER
+
 app = FastAPI(title="InvestorInsight API")
 
 app.add_middleware(
@@ -40,7 +43,7 @@ load_cache()
 
 @app.get("/")
 def root():
-    return {"status": "healthy", "last_updated": CACHE.get("last_updated")}
+    return {"status": "healthy", "last_updated": CACHE.get("last_updated"), "total_investors": len(SUPERINVESTORS)}
 
 @app.get("/api/superinvestors")
 def get_superinvestors():
@@ -54,45 +57,48 @@ def get_superinvestor(cik: str):
         return CACHE["details"][cik]
     return {"error": "Not found. Call /api/refresh first."}
 
-@app.get("/api/debug-putcall")
-def debug_putcall():
-    """Check if putCall is in the XML"""
-    xml_url = "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/infotable.xml"
-    response = requests.get(xml_url, headers=HEADERS, timeout=15)
-    xml_content = response.text
-    
-    # Find all putCall tags
-    putcalls = re.findall(r'<putCall>([^<]+)</putCall>', xml_content)
-    
-    # Find one infoTable with putCall
-    info_tables = re.findall(r'<infoTable>(.*?)</infoTable>', xml_content, re.DOTALL)
-    sample_with_putcall = None
-    for table in info_tables:
-        if '<putCall>' in table:
-            sample_with_putcall = table[:500]
-            break
-    
-    return {
-        "putcalls_found": putcalls,
-        "total_info_tables": len(info_tables),
-        "sample_with_putcall": sample_with_putcall
-    }
-
 @app.get("/api/refresh")
 def refresh_data():
-    from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
-    
-    scraper = SEC13FScraper(data_dir="./data/13f")
     investors = []
     details = {}
+    failed = []
     
     for cik, info in SUPERINVESTORS.items():
         try:
-            filings = scraper.get_cik_filings(cik, "13F-HR")
-            if not filings:
+            # Get filings list
+            cik_padded = cik.zfill(10)
+            url = f"https://data.sec.gov/submissions/CIK{cik_padded}.json"
+            
+            time.sleep(0.15)
+            response = requests.get(url, headers=HEADERS, timeout=15)
+            if response.status_code != 200:
+                failed.append({"cik": cik, "name": info["name"], "reason": "CIK not found"})
+                continue
+                
+            data = response.json()
+            recent = data.get("filings", {}).get("recent", {})
+            
+            if not recent:
+                failed.append({"cik": cik, "name": info["name"], "reason": "No filings"})
                 continue
             
-            accession = filings[0]["accession_number"].replace("-", "")
+            # Find 13F filing
+            forms = recent.get("form", [])
+            accessions = recent.get("accessionNumber", [])
+            dates = recent.get("filingDate", [])
+            
+            filing_idx = None
+            for i, form in enumerate(forms):
+                if form == "13F-HR" or form == "13F-HR/A":
+                    filing_idx = i
+                    break
+            
+            if filing_idx is None:
+                failed.append({"cik": cik, "name": info["name"], "reason": "No 13F filing"})
+                continue
+            
+            accession = accessions[filing_idx].replace("-", "")
+            filing_date = dates[filing_idx]
             index_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/"
             
             time.sleep(0.15)
@@ -106,6 +112,7 @@ def refresh_data():
                 matches = [x for x in all_xml if 'primary_doc' not in x.lower()]
             
             if not matches:
+                failed.append({"cik": cik, "name": info["name"], "reason": "No XML file"})
                 continue
             
             xml_file = matches[0]
@@ -137,7 +144,7 @@ def refresh_data():
                 if putcall:
                     name = f"{name} ({putcall})"
                 
-                ticker = scraper.cusip_to_ticker.get(cusip[:6]) or cusip[:6]
+                ticker = CUSIP_TO_TICKER.get(cusip[:6]) or cusip[:6]
                 
                 holdings.append({
                     "ticker": ticker,
@@ -147,6 +154,7 @@ def refresh_data():
                 })
             
             if not holdings:
+                failed.append({"cik": cik, "name": info["name"], "reason": "No holdings parsed"})
                 continue
             
             total_value = sum(h["value"] for h in holdings)
@@ -160,7 +168,7 @@ def refresh_data():
                 "name": info["name"],
                 "firm": info["firm"],
                 "value": total_value,
-                "filing_date": filings[0]["filing_date"]
+                "filing_date": filing_date
             })
             
             details[cik] = {
@@ -168,19 +176,6 @@ def refresh_data():
                 "name": info["name"],
                 "firm": info["firm"],
                 "value": total_value,
-                "filing_date": filings[0]["filing_date"],
+                "filing_date": filing_date,
                 "holdings": holdings
             }
-            
-        except Exception as e:
-            print(f"Error scraping {info['name']}: {e}")
-            continue
-    
-    investors.sort(key=lambda x: x["value"], reverse=True)
-    
-    CACHE["investors"] = investors
-    CACHE["details"] = details
-    CACHE["last_updated"] = datetime.now().isoformat()
-    save_cache()
-    
-    return {"status": "refreshed", "investors_count": len(investors), "last_updated": CACHE["last_updated"]}
