@@ -14,54 +14,46 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"name": "InvestorInsight API", "status": "online", "version": "v2"}
+    return {"name": "InvestorInsight API", "status": "online", "version": "v3"}
 
-@app.get("/api/debug-xml")
-def debug_xml():
-    """See what's in Burry's XML file"""
+@app.get("/api/test-scraper")
+def test_scraper(cik: str = "1649339"):
     try:
-        headers = {"User-Agent": "InvestorInsight test@test.com"}
+        from scrapers.sec_13f_scraper import SEC13FScraper, SUPERINVESTORS
         
-        # Burry's filing index
-        index_url = "https://www.sec.gov/Archives/edgar/data/1649339/000164933925000007/"
-        r = requests.get(index_url, headers=headers, timeout=15)
+        if cik not in SUPERINVESTORS:
+            return {"status": "error", "message": f"CIK {cik} not tracked"}
         
-        # Find all links
-        all_links = re.findall(r'href="([^"]+)"', r.text)
+        scraper = SEC13FScraper(data_dir="./data/13f")
+        filings = scraper.get_cik_filings(cik, "13F-HR")
         
-        # Find XML files
-        xml_files = [f for f in all_links if f.endswith('.xml')]
+        if not filings:
+            return {"status": "error", "message": "No 13F filings found"}
         
-        # Fetch the info table XML (not primary_doc)
-        xml_content = None
-        xml_url = None
-        for f in xml_files:
-            if 'primary_doc' not in f.lower():
-                if f.startswith('/'):
-                    xml_url = f"https://www.sec.gov{f}"
-                elif f.startswith('http'):
-                    xml_url = f
-                else:
-                    xml_url = f"{index_url}{f}"
-                r2 = requests.get(xml_url, headers=headers, timeout=15)
-                xml_content = r2.text
-                break
+        latest = filings[0]
+        holdings = scraper.get_13f_holdings(cik, latest["accession_number"])
         
-        if xml_content:
-            # Find unique tags
-            tags = list(set(re.findall(r'<([a-zA-Z0-9_:]+)', xml_content)))
-            
+        if not holdings:
             return {
-                "status": "ok",
-                "xml_url": xml_url,
-                "xml_files": xml_files,
-                "content_length": len(xml_content),
-                "tags_found": sorted(tags),
-                "preview": xml_content[:2000]
+                "status": "partial",
+                "message": "Found filing but couldn't parse holdings",
+                "filing": latest
             }
-        else:
-            return {"status": "error", "message": "No XML found", "xml_files": xml_files}
-            
+        
+        total_value = sum(h.value for h in holdings)
+        
+        return {
+            "status": "success",
+            "investor": SUPERINVESTORS[cik]["name"],
+            "firm": SUPERINVESTORS[cik]["firm"],
+            "filing_date": latest["filing_date"],
+            "total_value_thousands": total_value,
+            "positions": len(holdings),
+            "top_5": [
+                {"ticker": h.ticker or h.cusip[:6], "value": h.value, "pct": h.pct_portfolio}
+                for h in sorted(holdings, key=lambda x: x.value, reverse=True)[:5]
+            ]
+        }
     except Exception as e:
         import traceback
         return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
