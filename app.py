@@ -4,8 +4,12 @@ import json
 import os
 import re
 import time
-from datetime import datetime
+from datetime import datetime, date
 import requests
+
+# APScheduler for quarterly 13F refresh
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from scrapers.sec_13f_scraper import SUPERINVESTORS, CUSIP_TO_TICKER
 
@@ -17,6 +21,74 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# =============================================================================
+# QUARTERLY 13F REFRESH SCHEDULER
+# =============================================================================
+# Refresh window: 10 days before deadline → 5 days after deadline
+# Q4 filing (Feb 14): Feb 4-19
+# Q1 filing (May 15): May 5-20
+# Q2 filing (Aug 14): Aug 4-19
+# Q3 filing (Nov 14): Nov 4-19
+# =============================================================================
+
+REFRESH_WINDOWS = [
+    (2, 4, 2, 19),   # Q4 filing: Feb 4-19
+    (5, 5, 5, 20),   # Q1 filing: May 5-20
+    (8, 4, 8, 19),   # Q2 filing: Aug 4-19
+    (11, 4, 11, 19), # Q3 filing: Nov 4-19
+]
+
+scheduler = BackgroundScheduler()
+
+def is_in_refresh_window() -> bool:
+    today = date.today()
+    for start_month, start_day, end_month, end_day in REFRESH_WINDOWS:
+        if start_month == end_month:
+            if today.month == start_month and start_day <= today.day <= end_day:
+                return True
+    return False
+
+def get_next_refresh_window() -> str:
+    today = date.today()
+    current_year = today.year
+    for start_month, start_day, end_month, end_day in REFRESH_WINDOWS:
+        start_date = date(current_year, start_month, start_day)
+        end_date = date(current_year, end_month, end_day)
+        if end_date < today:
+            start_date = date(current_year + 1, start_month, start_day)
+            end_date = date(current_year + 1, end_month, end_day)
+        if start_date >= today or (start_date <= today <= end_date):
+            return f"{start_date.strftime('%b %d')} - {end_date.strftime('%b %d, %Y')}"
+    return "Unknown"
+
+def scheduled_13f_refresh():
+    print(f"[Scheduler] Checking refresh window... ({datetime.now()})")
+    if is_in_refresh_window():
+        print("[Scheduler] In window - starting refresh...")
+        do_full_refresh()
+        print("[Scheduler] Refresh complete")
+    else:
+        print(f"[Scheduler] Not in window. Next: {get_next_refresh_window()}")
+
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.add_job(
+        scheduled_13f_refresh,
+        CronTrigger(hour=6, minute=0),
+        id='quarterly_13f_refresh',
+        name='Quarterly 13F Data Refresh',
+        replace_existing=True
+    )
+    scheduler.start()
+    print("[Scheduler] Started (daily check at 6:00 AM UTC)")
+    print(f"[Scheduler] In refresh window: {is_in_refresh_window()}")
+    print(f"[Scheduler] Next window: {get_next_refresh_window()}")
+
+@app.on_event("shutdown")
+def stop_scheduler():
+    scheduler.shutdown(wait=False)
+    print("[Scheduler] Stopped")
 
 CACHE_FILE = "./data/cache.json"
 CACHE = {"investors": [], "details": {}, "last_updated": None, "refresh_status": "idle", "refresh_progress": 0, "failed": []}
@@ -124,16 +196,15 @@ def scrape_one(cik: str, info: dict):
         xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
         
         holdings = []
-        # Handle XML namespaces (ns1:infoTable, etc.)
-        for table in re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL | re.IGNORECASE):
-            cm = re.search(r'<(?:\w+:)?cusip[^>]*>([^<]+)</(?:\w+:)?cusip>', table, re.IGNORECASE)
+        for table in re.findall(r'<infoTable>(.*?)</infoTable>', xml, re.DOTALL):
+            cm = re.search(r'<cusip>([^<]+)</cusip>', table)
             if not cm:
                 continue
             cusip = cm.group(1)
-            nm = re.search(r'<(?:\w+:)?nameOfIssuer[^>]*>([^<]+)</(?:\w+:)?nameOfIssuer>', table, re.IGNORECASE)
-            vm = re.search(r'<(?:\w+:)?value[^>]*>([^<]+)</(?:\w+:)?value>', table, re.IGNORECASE)
-            sm = re.search(r'<(?:\w+:)?sshPrnamt[^>]*>([^<]+)</(?:\w+:)?sshPrnamt>', table, re.IGNORECASE)
-            pm = re.search(r'<(?:\w+:)?putCall[^>]*>([^<]+)</(?:\w+:)?putCall>', table, re.IGNORECASE)
+            nm = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
+            vm = re.search(r'<value>([^<]+)</value>', table)
+            sm = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
+            pm = re.search(r'<putCall>([^<]+)</putCall>', table)
             
             name = nm.group(1) if nm else ""
             if pm:
@@ -209,4 +280,22 @@ def refresh_data(background_tasks: BackgroundTasks):
         "status": "started",
         "message": "Refresh started in background. Check /api/status for progress.",
         "total_investors": len(SUPERINVESTORS)
+    }
+
+@app.get("/api/scheduler")
+def get_scheduler_status():
+    jobs = scheduler.get_jobs()
+    job_info = [{"id": j.id, "name": j.name, "next_run": j.next_run_time.isoformat() if j.next_run_time else None} for j in jobs]
+    return {
+        "scheduler_running": scheduler.running,
+        "in_refresh_window": is_in_refresh_window(),
+        "next_refresh_window": get_next_refresh_window(),
+        "refresh_windows": [
+            {"period": "Q4 filings", "window": "Feb 4-19"},
+            {"period": "Q1 filings", "window": "May 5-20"},
+            {"period": "Q2 filings", "window": "Aug 4-19"},
+            {"period": "Q3 filings", "window": "Nov 4-19"},
+        ],
+        "daily_check_time": "6:00 AM UTC",
+        "scheduled_jobs": job_info
     }
