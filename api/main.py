@@ -15,12 +15,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from enum import Enum
 import json
 from pathlib import Path
 import asyncio
 from contextlib import asynccontextmanager
+import threading
+
+# APScheduler for quarterly 13F refresh
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 # Import scrapers
 import sys
@@ -153,11 +158,15 @@ class NetWorthSummaryResponse(BaseModel):
 # Lifespan context manager for startup/shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Load data
+    # Startup: Load data and start scheduler
     print("Loading data...")
     load_cached_data()
+    print("Starting quarterly refresh scheduler...")
+    start_scheduler()
     yield
-    # Shutdown
+    # Shutdown: Stop scheduler
+    print("Stopping scheduler...")
+    scheduler.shutdown(wait=False)
     print("Shutting down...")
 
 
@@ -186,6 +195,108 @@ cache = {
     "congress_networth": {},  # Net worth data
     "last_updated": None
 }
+
+# =============================================================================
+# Quarterly 13F Refresh Scheduler
+# =============================================================================
+# 13F filing deadlines are 45 days after quarter end:
+#   Q4 (Dec 31) → Feb 14
+#   Q1 (Mar 31) → May 15
+#   Q2 (Jun 30) → Aug 14
+#   Q3 (Sep 30) → Nov 14
+#
+# Refresh window: 10 days before deadline → 5 days after deadline
+# =============================================================================
+
+# Define refresh windows as (start_month, start_day, end_month, end_day)
+REFRESH_WINDOWS = [
+    (2, 4, 2, 19),   # Q4 filing: Feb 4-19
+    (5, 5, 5, 20),   # Q1 filing: May 5-20
+    (8, 4, 8, 19),   # Q2 filing: Aug 4-19
+    (11, 4, 11, 19), # Q3 filing: Nov 4-19
+]
+
+scheduler = BackgroundScheduler()
+
+def is_in_refresh_window() -> bool:
+    """Check if today falls within a 13F refresh window."""
+    today = date.today()
+    current_month = today.month
+    current_day = today.day
+    
+    for start_month, start_day, end_month, end_day in REFRESH_WINDOWS:
+        # Check if today is within this window
+        if start_month == end_month:
+            # Same month window
+            if current_month == start_month and start_day <= current_day <= end_day:
+                return True
+        else:
+            # Cross-month window (shouldn't happen with current windows, but handle it)
+            if (current_month == start_month and current_day >= start_day) or \
+               (current_month == end_month and current_day <= end_day):
+                return True
+    
+    return False
+
+def get_next_refresh_window() -> str:
+    """Get info about the next refresh window."""
+    today = date.today()
+    current_year = today.year
+    
+    windows_with_dates = []
+    for start_month, start_day, end_month, end_day in REFRESH_WINDOWS:
+        start_date = date(current_year, start_month, start_day)
+        end_date = date(current_year, end_month, end_day)
+        
+        # If window has passed this year, use next year
+        if end_date < today:
+            start_date = date(current_year + 1, start_month, start_day)
+            end_date = date(current_year + 1, end_month, end_day)
+        
+        windows_with_dates.append((start_date, end_date))
+    
+    # Sort by start date and get the next one
+    windows_with_dates.sort(key=lambda x: x[0])
+    for start_date, end_date in windows_with_dates:
+        if start_date >= today or (start_date <= today <= end_date):
+            return f"{start_date.strftime('%b %d')} - {end_date.strftime('%b %d, %Y')}"
+    
+    return "Unknown"
+
+def scheduled_13f_refresh():
+    """
+    Daily scheduled job that refreshes 13F data if we're in a filing window.
+    Runs every day at 6:00 AM UTC.
+    """
+    print(f"[Scheduler] Checking if in 13F refresh window... ({datetime.now()})")
+    
+    if is_in_refresh_window():
+        print("[Scheduler] ✓ In refresh window - starting 13F data refresh...")
+        try:
+            scraper = SEC13FScraper(data_dir=str(THIRTEENF_DIR))
+            scraper.scrape_all_superinvestors()
+            load_cached_data()
+            print("[Scheduler] ✓ 13F refresh completed successfully")
+        except Exception as e:
+            print(f"[Scheduler] ✗ 13F refresh failed: {e}")
+    else:
+        next_window = get_next_refresh_window()
+        print(f"[Scheduler] Not in refresh window. Next window: {next_window}")
+
+def start_scheduler():
+    """Start the background scheduler for quarterly 13F refreshes."""
+    # Run daily at 6:00 AM UTC
+    scheduler.add_job(
+        scheduled_13f_refresh,
+        CronTrigger(hour=6, minute=0),
+        id='quarterly_13f_refresh',
+        name='Quarterly 13F Data Refresh',
+        replace_existing=True
+    )
+    scheduler.start()
+    print("[Scheduler] Started quarterly 13F refresh scheduler (daily check at 6:00 AM UTC)")
+    print(f"[Scheduler] Currently in refresh window: {is_in_refresh_window()}")
+    print(f"[Scheduler] Next refresh window: {get_next_refresh_window()}")
 
 
 def load_cached_data():
@@ -1036,6 +1147,35 @@ async def get_data_status():
             "congress_transactions": "STOCK Act Periodic Transaction Reports (PTRs)",
             "congress_networth": "STOCK Act Annual Financial Disclosures (AFDs)"
         }
+    }
+
+
+@app.get("/api/scheduler")
+async def get_scheduler_status():
+    """
+    Get status of the quarterly 13F refresh scheduler.
+    """
+    jobs = scheduler.get_jobs()
+    job_info = []
+    for job in jobs:
+        job_info.append({
+            "id": job.id,
+            "name": job.name,
+            "next_run": job.next_run_time.isoformat() if job.next_run_time else None
+        })
+    
+    return {
+        "scheduler_running": scheduler.running,
+        "in_refresh_window": is_in_refresh_window(),
+        "next_refresh_window": get_next_refresh_window(),
+        "refresh_windows": [
+            {"period": "Q4 filings", "window": "Feb 4-19"},
+            {"period": "Q1 filings", "window": "May 5-20"},
+            {"period": "Q2 filings", "window": "Aug 4-19"},
+            {"period": "Q3 filings", "window": "Nov 4-19"},
+        ],
+        "daily_check_time": "6:00 AM UTC",
+        "scheduled_jobs": job_info
     }
 
 
