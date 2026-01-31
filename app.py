@@ -25,6 +25,147 @@ app.add_middleware(
 )
 
 # =============================================================================
+# CUSIP TO TICKER LOOKUP SYSTEM (OpenFIGI API)
+# =============================================================================
+# OpenFIGI is a free API that maps CUSIPs to tickers
+# Rate limit: 25 requests/minute, 100 identifiers per request (no API key)
+# With API key: 250 requests/minute
+# =============================================================================
+
+CUSIP_CACHE_FILE = "cusip_cache.json"
+CUSIP_CACHE = {}  # In-memory cache: cusip -> {"ticker": "AAPL", "name": "Apple Inc"}
+
+def load_cusip_cache():
+    global CUSIP_CACHE
+    if os.path.exists(CUSIP_CACHE_FILE):
+        try:
+            with open(CUSIP_CACHE_FILE, 'r') as f:
+                CUSIP_CACHE = json.load(f)
+            print(f"[CUSIP] Loaded {len(CUSIP_CACHE)} cached mappings")
+        except:
+            CUSIP_CACHE = {}
+
+def save_cusip_cache():
+    try:
+        with open(CUSIP_CACHE_FILE, 'w') as f:
+            json.dump(CUSIP_CACHE, f)
+    except Exception as e:
+        print(f"[CUSIP] Failed to save cache: {e}")
+
+def lookup_cusips_openfigi(cusips: list) -> dict:
+    """
+    Batch lookup CUSIPs via OpenFIGI API.
+    Returns dict: cusip -> {"ticker": "AAPL", "name": "Apple Inc"} or None if not found
+    """
+    if not cusips:
+        return {}
+    
+    # OpenFIGI accepts up to 100 identifiers per request
+    results = {}
+    
+    for i in range(0, len(cusips), 100):
+        batch = cusips[i:i+100]
+        
+        # Build request payload
+        payload = [{"idType": "ID_CUSIP", "idValue": c} for c in batch]
+        
+        try:
+            r = requests.post(
+                "https://api.openfigi.com/v3/mapping",
+                headers={"Content-Type": "application/json"},
+                json=payload,
+                timeout=10
+            )
+            
+            if r.status_code == 200:
+                data = r.json()
+                for j, item in enumerate(data):
+                    cusip = batch[j]
+                    if item and "data" in item and len(item["data"]) > 0:
+                        figi_data = item["data"][0]
+                        ticker = figi_data.get("ticker", "")
+                        name = figi_data.get("name", "")
+                        if ticker:
+                            results[cusip] = {"ticker": ticker, "name": name}
+                            # Also cache by 6-char prefix for flexibility
+                            results[cusip[:6]] = {"ticker": ticker, "name": name}
+            elif r.status_code == 429:
+                print("[CUSIP] Rate limited by OpenFIGI, waiting...")
+                time.sleep(60)  # Wait a minute if rate limited
+            else:
+                print(f"[CUSIP] OpenFIGI error: {r.status_code}")
+                
+            # Respect rate limits
+            time.sleep(0.5)
+            
+        except Exception as e:
+            print(f"[CUSIP] OpenFIGI lookup failed: {e}")
+    
+    return results
+
+def get_ticker_for_cusip(cusip: str, issuer_name: str = "") -> str:
+    """
+    Get ticker for a CUSIP. Checks in order:
+    1. In-memory cache
+    2. Hardcoded mappings
+    3. Returns CUSIP prefix if not found (will be resolved in batch later)
+    """
+    cusip_6 = cusip[:6]
+    
+    # Check cache first
+    if cusip in CUSIP_CACHE:
+        return CUSIP_CACHE[cusip].get("ticker", cusip_6)
+    if cusip_6 in CUSIP_CACHE:
+        return CUSIP_CACHE[cusip_6].get("ticker", cusip_6)
+    
+    # Check hardcoded mappings
+    if cusip_6 in CUSIP_TO_TICKER:
+        return CUSIP_TO_TICKER[cusip_6]
+    
+    # Return prefix - will be resolved later
+    return cusip_6
+
+def resolve_unknown_cusips(holdings: list) -> list:
+    """
+    Take a list of holdings with potentially unknown CUSIPs and resolve them via OpenFIGI.
+    Updates the CUSIP_CACHE and returns updated holdings.
+    """
+    # Find CUSIPs we don't know
+    unknown_cusips = []
+    for h in holdings:
+        ticker = h.get("ticker", "")
+        # If ticker looks like a CUSIP (6 chars, has numbers), it's unresolved
+        if len(ticker) == 6 and any(c.isdigit() for c in ticker):
+            # Get the full CUSIP if available, otherwise use ticker as prefix
+            cusip = h.get("cusip", ticker)
+            if cusip not in CUSIP_CACHE and cusip[:6] not in CUSIP_CACHE:
+                unknown_cusips.append(cusip)
+    
+    if unknown_cusips:
+        print(f"[CUSIP] Looking up {len(unknown_cusips)} unknown CUSIPs via OpenFIGI...")
+        new_mappings = lookup_cusips_openfigi(list(set(unknown_cusips)))
+        
+        if new_mappings:
+            CUSIP_CACHE.update(new_mappings)
+            save_cusip_cache()
+            print(f"[CUSIP] Resolved {len(new_mappings)} new mappings")
+            
+            # Update holdings with new tickers
+            for h in holdings:
+                ticker = h.get("ticker", "")
+                if len(ticker) == 6 and any(c.isdigit() for c in ticker):
+                    cusip = h.get("cusip", ticker)
+                    if cusip in CUSIP_CACHE:
+                        h["ticker"] = CUSIP_CACHE[cusip]["ticker"]
+                    elif cusip[:6] in CUSIP_CACHE:
+                        h["ticker"] = CUSIP_CACHE[cusip[:6]]["ticker"]
+    
+    return holdings
+
+# Load CUSIP cache on startup
+load_cusip_cache()
+
+# =============================================================================
 # QUARTERLY 13F REFRESH SCHEDULER
 # =============================================================================
 # Refresh window: 10 days before deadline → 5 days after deadline
@@ -209,7 +350,7 @@ def scrape_one(cik: str, info: dict):
             cm = re.search(r'<(?:\w+:)?cusip>([^<]+)</(?:\w+:)?cusip>', table, re.IGNORECASE)
             if not cm:
                 continue
-            cusip = cm.group(1)
+            cusip = cm.group(1).strip()
             nm = re.search(r'<(?:\w+:)?nameOfIssuer>([^<]+)</(?:\w+:)?nameOfIssuer>', table, re.IGNORECASE)
             vm = re.search(r'<(?:\w+:)?value>([^<]+)</(?:\w+:)?value>', table, re.IGNORECASE)
             
@@ -229,8 +370,10 @@ def scrape_one(cik: str, info: dict):
             if pm:
                 name = f"{name} ({pm.group(1).upper()})"
             
+            # Use new CUSIP lookup system - stores full CUSIP for later resolution
             holdings.append({
-                "ticker": CUSIP_TO_TICKER.get(cusip[:6]) or cusip[:6],
+                "cusip": cusip,  # Store full CUSIP for OpenFIGI lookup
+                "ticker": get_ticker_for_cusip(cusip, name),
                 "name": name,
                 "value": int(vm.group(1)) if vm else 0,
                 "shares": int(sm.group(1)) if sm else 0,
@@ -238,6 +381,9 @@ def scrape_one(cik: str, info: dict):
         
         if not holdings:
             return None, "No holdings parsed"
+        
+        # Resolve any unknown CUSIPs via OpenFIGI API
+        holdings = resolve_unknown_cusips(holdings)
         
         total = sum(h["value"] for h in holdings)
         for h in holdings:
@@ -318,6 +464,65 @@ def get_scheduler_status():
         "daily_check_time": "6:00 AM UTC",
         "scheduled_jobs": job_info
     }
+
+@app.get("/api/cusip")
+def get_cusip_cache():
+    """View CUSIP cache statistics and sample mappings"""
+    return {
+        "total_cached": len(CUSIP_CACHE),
+        "sample_mappings": dict(list(CUSIP_CACHE.items())[:20]),
+        "hardcoded_count": len(CUSIP_TO_TICKER)
+    }
+
+@app.get("/api/cusip/lookup/{cusip}")
+def lookup_single_cusip(cusip: str):
+    """Look up a single CUSIP and cache the result"""
+    # Check cache first
+    if cusip in CUSIP_CACHE:
+        return {"source": "cache", "cusip": cusip, "data": CUSIP_CACHE[cusip]}
+    if cusip[:6] in CUSIP_CACHE:
+        return {"source": "cache", "cusip": cusip, "data": CUSIP_CACHE[cusip[:6]]}
+    if cusip[:6] in CUSIP_TO_TICKER:
+        return {"source": "hardcoded", "cusip": cusip, "ticker": CUSIP_TO_TICKER[cusip[:6]]}
+    
+    # Look up via OpenFIGI
+    results = lookup_cusips_openfigi([cusip])
+    if results:
+        return {"source": "openfigi", "cusip": cusip, "data": results.get(cusip) or results.get(cusip[:6])}
+    
+    return {"source": "not_found", "cusip": cusip, "data": None}
+
+@app.get("/api/debug/cache/{cik}")
+def debug_cache(cik: str):
+    """See what's actually in the cache for this investor"""
+    if cik in CACHE["details"]:
+        data = CACHE["details"][cik]
+        return {
+            "in_cache": True,
+            "holdings_count": len(data.get("holdings", [])),
+            "data": data
+        }
+    return {"in_cache": False, "cik": cik}
+
+@app.get("/api/debug/refresh/{cik}")
+def debug_refresh_one(cik: str):
+    """Force re-scrape a single investor and update cache"""
+    if cik not in SUPERINVESTORS:
+        return {"error": "CIK not in SUPERINVESTORS list"}
+    
+    info = SUPERINVESTORS[cik]
+    result, error = scrape_one(cik, info)
+    
+    if result:
+        CACHE["details"][cik] = result
+        save_cache()
+        return {
+            "success": True,
+            "holdings_count": len(result.get("holdings", [])),
+            "data": result
+        }
+    else:
+        return {"success": False, "error": error}
 
 @app.get("/api/debug/scrape/{cik}")
 def debug_scrape(cik: str):
