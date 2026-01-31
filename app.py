@@ -60,11 +60,12 @@ def lookup_cusips_openfigi(cusips: list) -> dict:
     if not cusips:
         return {}
     
-    # OpenFIGI accepts up to 100 identifiers per request
+    # OpenFIGI has undocumented size limits - use small batches
+    BATCH_SIZE = 10
     results = {}
     
-    for i in range(0, len(cusips), 100):
-        batch = cusips[i:i+100]
+    for i in range(0, len(cusips), BATCH_SIZE):
+        batch = cusips[i:i+BATCH_SIZE]
         
         # Build request payload
         payload = [{"idType": "ID_CUSIP", "idValue": c} for c in batch]
@@ -90,13 +91,16 @@ def lookup_cusips_openfigi(cusips: list) -> dict:
                             # Also cache by 6-char prefix for flexibility
                             results[cusip[:6]] = {"ticker": ticker, "name": name}
             elif r.status_code == 429:
-                print("[CUSIP] Rate limited by OpenFIGI, waiting...")
-                time.sleep(60)  # Wait a minute if rate limited
+                print("[CUSIP] Rate limited by OpenFIGI, waiting 60s...")
+                time.sleep(60)
+            elif r.status_code == 413:
+                # Payload too large - this shouldn't happen with batch size of 10
+                print(f"[CUSIP] Batch too large ({len(batch)}), skipping")
             else:
                 print(f"[CUSIP] OpenFIGI error: {r.status_code}")
                 
-            # Respect rate limits
-            time.sleep(0.5)
+            # Respect rate limits - small delay between batches
+            time.sleep(0.3)
             
         except Exception as e:
             print(f"[CUSIP] OpenFIGI lookup failed: {e}")
@@ -129,36 +133,41 @@ def resolve_unknown_cusips(holdings: list) -> list:
     """
     Take a list of holdings with potentially unknown CUSIPs and resolve them via OpenFIGI.
     Updates the CUSIP_CACHE and returns updated holdings.
+    Limits lookups to avoid rate limiting.
     """
-    # Find CUSIPs we don't know
-    unknown_cusips = []
+    # Find CUSIPs we don't know - deduplicate by 6-char prefix
+    unknown_cusips = {}
     for h in holdings:
         ticker = h.get("ticker", "")
         # If ticker looks like a CUSIP (6 chars, has numbers), it's unresolved
         if len(ticker) == 6 and any(c.isdigit() for c in ticker):
-            # Get the full CUSIP if available, otherwise use ticker as prefix
             cusip = h.get("cusip", ticker)
-            if cusip not in CUSIP_CACHE and cusip[:6] not in CUSIP_CACHE:
-                unknown_cusips.append(cusip)
+            cusip_6 = cusip[:6]
+            # Check both full and prefix in cache
+            if cusip not in CUSIP_CACHE and cusip_6 not in CUSIP_CACHE:
+                unknown_cusips[cusip_6] = cusip  # Dedupe by prefix
     
-    if unknown_cusips:
-        print(f"[CUSIP] Looking up {len(unknown_cusips)} unknown CUSIPs via OpenFIGI...")
-        new_mappings = lookup_cusips_openfigi(list(set(unknown_cusips)))
+    # Limit to 50 lookups per call to avoid rate limiting
+    unknown_list = list(unknown_cusips.values())[:50]
+    
+    if unknown_list:
+        print(f"[CUSIP] Looking up {len(unknown_list)} unknown CUSIPs via OpenFIGI...")
+        new_mappings = lookup_cusips_openfigi(unknown_list)
         
         if new_mappings:
             CUSIP_CACHE.update(new_mappings)
             save_cusip_cache()
             print(f"[CUSIP] Resolved {len(new_mappings)} new mappings")
-            
-            # Update holdings with new tickers
-            for h in holdings:
-                ticker = h.get("ticker", "")
-                if len(ticker) == 6 and any(c.isdigit() for c in ticker):
-                    cusip = h.get("cusip", ticker)
-                    if cusip in CUSIP_CACHE:
-                        h["ticker"] = CUSIP_CACHE[cusip]["ticker"]
-                    elif cusip[:6] in CUSIP_CACHE:
-                        h["ticker"] = CUSIP_CACHE[cusip[:6]]["ticker"]
+    
+    # Update holdings with resolved tickers (from cache)
+    for h in holdings:
+        ticker = h.get("ticker", "")
+        if len(ticker) == 6 and any(c.isdigit() for c in ticker):
+            cusip = h.get("cusip", ticker)
+            if cusip in CUSIP_CACHE:
+                h["ticker"] = CUSIP_CACHE[cusip]["ticker"]
+            elif cusip[:6] in CUSIP_CACHE:
+                h["ticker"] = CUSIP_CACHE[cusip[:6]]["ticker"]
     
     return holdings
 
