@@ -357,14 +357,36 @@ def debug_scrape(cik: str):
         # Count raw infoTable entries
         info_tables = re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL | re.IGNORECASE)
         
+        # Parse each one and show what we get
+        parsed = []
+        for i, table in enumerate(info_tables):
+            cm = re.search(r'<(?:\w+:)?cusip>([^<]+)</(?:\w+:)?cusip>', table, re.IGNORECASE)
+            nm = re.search(r'<(?:\w+:)?nameOfIssuer>([^<]+)</(?:\w+:)?nameOfIssuer>', table, re.IGNORECASE)
+            vm = re.search(r'<(?:\w+:)?value>([^<]+)</(?:\w+:)?value>', table, re.IGNORECASE)
+            
+            # Try multiple patterns for shares
+            sm = re.search(r'<(?:\w+:)?sshPrnamt>(\d+)</(?:\w+:)?sshPrnamt>', table, re.IGNORECASE)
+            if not sm:
+                shares_block = re.search(r'<(?:\w+:)?shrsOrPrnAmt[^>]*>(.*?)</(?:\w+:)?shrsOrPrnAmt>', table, re.DOTALL | re.IGNORECASE)
+                if shares_block:
+                    sm = re.search(r'<(?:\w+:)?sshPrnamt>(\d+)</(?:\w+:)?sshPrnamt>', shares_block.group(1), re.IGNORECASE)
+            
+            parsed.append({
+                "index": i,
+                "has_cusip": cm is not None,
+                "cusip": cm.group(1) if cm else None,
+                "name": nm.group(1) if nm else None,
+                "value": vm.group(1) if vm else None,
+                "shares": sm.group(1) if sm else None,
+            })
+        
         return {
             "cik": cik,
             "name": info["name"],
             "xml_url": xml_url,
-            "xml_length": len(xml),
             "info_table_count": len(info_tables),
-            "first_500_chars": xml[:500],
-            "sample_table": info_tables[0][:500] if info_tables else "None"
+            "parsed_count": len([p for p in parsed if p["has_cusip"]]),
+            "parsed_details": parsed
         }
     except Exception as e:
         return {"error": str(e)}
