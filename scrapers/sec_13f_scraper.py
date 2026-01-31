@@ -293,11 +293,11 @@ SUPERINVESTORS = {
         "firm": "Kahn Brothers Group Inc",
         "cik": "1039565"
     },
-    # Lee Ainslie - Maverick Capital
-    "1038909": {
+    # Lee Ainslie - Maverick Capital (CIK verified via SEC 13F filings)
+    "934639": {
         "name": "Lee Ainslie",
         "firm": "Maverick Capital Ltd",
-        "cik": "1038909"
+        "cik": "934639"
     },
     # Mairs & Power
     "842399": {
@@ -323,11 +323,11 @@ SUPERINVESTORS = {
         "firm": "Fairfax Financial Holdings Ltd",
         "cik": "1442236"
     },
-    # Richard Pzena - Pzena Investment Management
-    "1364594": {
+    # Richard Pzena - Pzena Investment Management (CIK verified via SEC 13F filings)
+    "1027796": {
         "name": "Richard Pzena",
         "firm": "Pzena Investment Management LLC",
-        "cik": "1364594"
+        "cik": "1027796"
     },
     # Robert Olstein - Olstein Capital Management
     "1092031": {
@@ -335,22 +335,22 @@ SUPERINVESTORS = {
         "firm": "Olstein Capital Management LP",
         "cik": "1092031"
     },
-    # Ruane Cunniff & Goldfarb
-    "310159": {
+    # Ruane Cunniff & Goldfarb (CIK verified via SEC 13F filings)
+    "728014": {
         "name": "Ruane Cunniff",
         "firm": "Ruane Cunniff & Goldfarb LLC",
-        "cik": "310159"
+        "cik": "728014"
     },
     
     # =========================================================================
     # SECTION 3 CORRECTIONS (10 investors) - Verified 2026-01-31
     # =========================================================================
     
-    # Sarah Ketterer - Causeway Capital
-    "1133081": {
+    # Sarah Ketterer - Causeway Capital (CIK verified via SEC 13F filings)
+    "1165797": {
         "name": "Sarah Ketterer",
         "firm": "Causeway Capital Management LLC",
-        "cik": "1133081"
+        "cik": "1165797"
     },
     # Steven Romick - First Pacific Advisors (FPA)
     "1111665": {
@@ -482,11 +482,11 @@ SUPERINVESTORS = {
         "firm": "Patient Capital Management LLC",
         "cik": "1854794"
     },
-    # Stephen Mandel - Lone Pine Capital
-    "1111602": {
+    # Stephen Mandel - Lone Pine Capital (CIK verified via SEC 13F filings)
+    "1061165": {
         "name": "Stephen Mandel",
         "firm": "Lone Pine Capital LLC",
-        "cik": "1111602"
+        "cik": "1061165"
     },
     # Tom Bancroft - Makaira Partners
     "1540866": {
@@ -517,11 +517,11 @@ SUPERINVESTORS = {
     # ADDITIONAL INVESTORS TO REACH 77 TOTAL
     # =========================================================================
     
-    # Donald Yacktman - Yacktman Asset Management
-    "802152": {
+    # Donald Yacktman - Yacktman Asset Management (CIK verified via SEC 13F filings)
+    "905567": {
         "name": "Donald Yacktman",
         "firm": "Yacktman Asset Management LP",
-        "cik": "802152"
+        "cik": "905567"
     },
     # First Eagle Investment Management
     "1436879": {
@@ -541,11 +541,11 @@ SUPERINVESTORS = {
         "firm": "Leucadia National Corporation",
         "cik": "96223"
     },
-    # Eddie Lampert - ESL Investments
-    "1050956": {
+    # Eddie Lampert - ESL Investments (CIK verified via SEC 13F filings)
+    "1126396": {
         "name": "Eddie Lampert",
         "firm": "ESL Investments Inc",
-        "cik": "1050956"
+        "cik": "1126396"
     },
     # Bruce Berkowitz - Fairholme Capital
     "1056831": {
