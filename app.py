@@ -204,15 +204,26 @@ def scrape_one(cik: str, info: dict):
         xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
         
         holdings = []
-        for table in re.findall(r'<infoTable>(.*?)</infoTable>', xml, re.DOTALL):
-            cm = re.search(r'<cusip>([^<]+)</cusip>', table)
+        # Handle both with and without namespace prefixes (ns1:infoTable or infoTable)
+        for table in re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL | re.IGNORECASE):
+            cm = re.search(r'<(?:\w+:)?cusip>([^<]+)</(?:\w+:)?cusip>', table, re.IGNORECASE)
             if not cm:
                 continue
             cusip = cm.group(1)
-            nm = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
-            vm = re.search(r'<value>([^<]+)</value>', table)
-            sm = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
-            pm = re.search(r'<putCall>([^<]+)</putCall>', table)
+            nm = re.search(r'<(?:\w+:)?nameOfIssuer>([^<]+)</(?:\w+:)?nameOfIssuer>', table, re.IGNORECASE)
+            vm = re.search(r'<(?:\w+:)?value>([^<]+)</(?:\w+:)?value>', table, re.IGNORECASE)
+            
+            # Try multiple patterns for shares - they can be nested in different ways
+            sm = None
+            # Pattern 1: Direct sshPrnamt
+            sm = re.search(r'<(?:\w+:)?sshPrnamt>(\d+)</(?:\w+:)?sshPrnamt>', table, re.IGNORECASE)
+            if not sm:
+                # Pattern 2: Inside shrsOrPrnAmt wrapper
+                shares_block = re.search(r'<(?:\w+:)?shrsOrPrnAmt[^>]*>(.*?)</(?:\w+:)?shrsOrPrnAmt>', table, re.DOTALL | re.IGNORECASE)
+                if shares_block:
+                    sm = re.search(r'<(?:\w+:)?sshPrnamt>(\d+)</(?:\w+:)?sshPrnamt>', shares_block.group(1), re.IGNORECASE)
+            
+            pm = re.search(r'<(?:\w+:)?putCall>([^<]+)</(?:\w+:)?putCall>', table, re.IGNORECASE)
             
             name = nm.group(1) if nm else ""
             if pm:
@@ -307,3 +318,53 @@ def get_scheduler_status():
         "daily_check_time": "6:00 AM UTC",
         "scheduled_jobs": job_info
     }
+
+@app.get("/api/debug/scrape/{cik}")
+def debug_scrape(cik: str):
+    """Debug endpoint to see raw scraping data"""
+    if cik not in SUPERINVESTORS:
+        return {"error": "CIK not in SUPERINVESTORS list"}
+    
+    info = SUPERINVESTORS[cik]
+    try:
+        cik_padded = cik.zfill(10)
+        r = requests.get(f"https://data.sec.gov/submissions/CIK{cik_padded}.json", headers=HEADERS, timeout=8)
+        if r.status_code != 200:
+            return {"error": f"CIK lookup failed: {r.status_code}"}
+        data = r.json()
+        recent = data.get("filings", {}).get("recent", {})
+        forms = recent.get("form", [])
+        accessions = recent.get("accessionNumber", [])
+        
+        idx = next((i for i, f in enumerate(forms) if f in ["13F-HR", "13F-HR/A"]), None)
+        if idx is None:
+            return {"error": "No 13F-HR filing found"}
+        
+        acc = accessions[idx].replace("-", "")
+        index_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/"
+        
+        r = requests.get(index_url, headers=HEADERS, timeout=8)
+        matches = re.findall(r'href="([^"]*infotable[^"]*\.xml)"', r.text, re.IGNORECASE)
+        if not matches:
+            matches = [x for x in re.findall(r'href="([^"]+\.xml)"', r.text, re.IGNORECASE) if 'primary_doc' not in x.lower()]
+        
+        if not matches:
+            return {"error": "No XML file found", "index_url": index_url}
+        
+        xml_url = f"https://www.sec.gov{matches[0]}" if matches[0].startswith('/') else f"{index_url}{matches[0]}"
+        xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
+        
+        # Count raw infoTable entries
+        info_tables = re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL | re.IGNORECASE)
+        
+        return {
+            "cik": cik,
+            "name": info["name"],
+            "xml_url": xml_url,
+            "xml_length": len(xml),
+            "info_table_count": len(info_tables),
+            "first_500_chars": xml[:500],
+            "sample_table": info_tables[0][:500] if info_tables else "None"
+        }
+    except Exception as e:
+        return {"error": str(e)}
