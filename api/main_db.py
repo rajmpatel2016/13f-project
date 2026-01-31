@@ -1,5 +1,6 @@
 """
-InvestorInsight API Backend - Database Version
+# Force rebuild - v2
+"""InvestorInsight API Backend - Database Version
 
 FastAPI server using SQLite database for:
 - Superinvestor 13F holdings data
