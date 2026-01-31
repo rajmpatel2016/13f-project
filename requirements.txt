@@ -1,3 +1,4 @@
+# Force rebuild v2
 # InvestorInsight Backend Dependencies
 # Install with: pip install -r requirements.txt
 
