@@ -80,7 +80,7 @@
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect } = React;
-    const API = 'https://13f-project-production.up.railway.app';
+    const API = 'http://localhost:8000';
 
     // ═══════════════════════════════════════════════════════════════
     // SAMPLE DATA (fallback when API offline)
@@ -1474,7 +1474,7 @@
       const [politician, setPolitician] = useState(null);
       const [online, setOnline] = useState(false);
 
-      useEffect(() => { api.get('/').then(r => setOnline(r?.status === 'healthy')); }, []);
+      useEffect(() => { api.get('/health').then(r => setOnline(r?.status === 'healthy')); }, []);
 
       return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
