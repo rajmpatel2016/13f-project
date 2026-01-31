@@ -1,5 +1,4 @@
-"""
-# Force rebuild - v2
+print("=== LOADING main_db.py ===")
 """InvestorInsight API Backend - Database Version
 
 FastAPI server using SQLite database for:
