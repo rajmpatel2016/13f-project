@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 CACHE_FILE = "./data/cache.json"
-CACHE = {"investors": [], "details": {}, "last_updated": None, "refresh_status": "idle", "refresh_progress": 0}
+CACHE = {"investors": [], "details": {}, "last_updated": None, "refresh_status": "idle", "refresh_progress": 0, "failed": []}
 
 HEADERS = {
     "User-Agent": "InvestorInsight Research Bot (contact@investorinsight.com)",
@@ -70,12 +70,20 @@ def debug():
         "last_5": list(SUPERINVESTORS.keys())[-5:]
     }
 
+@app.get("/api/failed")
+def get_failed():
+    return {
+        "failed_count": len(CACHE.get("failed", [])),
+        "failed": CACHE.get("failed", [])
+    }
+
 @app.get("/api/status")
 def get_status():
     return {
         "refresh_status": CACHE.get("refresh_status", "idle"),
         "refresh_progress": CACHE.get("refresh_progress", 0),
         "cached_investors": len(CACHE.get("investors", [])),
+        "failed_count": len(CACHE.get("failed", [])),
         "last_updated": CACHE.get("last_updated")
     }
 
@@ -85,11 +93,11 @@ def scrape_one(cik: str, info: dict):
         time.sleep(0.12)
         r = requests.get(f"https://data.sec.gov/submissions/CIK{cik_padded}.json", headers=HEADERS, timeout=8)
         if r.status_code != 200:
-            return None
+            return None, "CIK not found"
         data = r.json()
         recent = data.get("filings", {}).get("recent", {})
         if not recent:
-            return None
+            return None, "No recent filings"
         
         forms = recent.get("form", [])
         accessions = recent.get("accessionNumber", [])
@@ -97,7 +105,7 @@ def scrape_one(cik: str, info: dict):
         
         idx = next((i for i, f in enumerate(forms) if f in ["13F-HR", "13F-HR/A"]), None)
         if idx is None:
-            return None
+            return None, "No 13F-HR filing"
         
         acc = accessions[idx].replace("-", "")
         index_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/"
@@ -108,7 +116,7 @@ def scrape_one(cik: str, info: dict):
         if not matches:
             matches = [x for x in re.findall(r'href="([^"]+\.xml)"', r.text, re.IGNORECASE) if 'primary_doc' not in x.lower()]
         if not matches:
-            return None
+            return None, "No XML file found"
         
         xml_url = f"https://www.sec.gov{matches[0]}" if matches[0].startswith('/') else f"{index_url}{matches[0]}"
         
@@ -138,30 +146,33 @@ def scrape_one(cik: str, info: dict):
             })
         
         if not holdings:
-            return None
+            return None, "No holdings parsed"
         
         total = sum(h["value"] for h in holdings)
         for h in holdings:
             h["pct"] = round((h["value"] / total) * 100, 2) if total > 0 else 0
         holdings.sort(key=lambda x: x["value"], reverse=True)
         
-        return {"cik": cik, "name": info["name"], "firm": info["firm"], "value": total, "filing_date": dates[idx], "holdings": holdings}
-    except:
-        return None
+        return {"cik": cik, "name": info["name"], "firm": info["firm"], "value": total, "filing_date": dates[idx], "holdings": holdings}, None
+    except Exception as e:
+        return None, str(e)
 
 def do_full_refresh():
     global CACHE
     CACHE["refresh_status"] = "running"
     CACHE["refresh_progress"] = 0
+    CACHE["failed"] = []
     save_cache()
     
     total = len(SUPERINVESTORS)
     done = 0
     
     for cik, info in SUPERINVESTORS.items():
-        result = scrape_one(cik, info)
+        result, error = scrape_one(cik, info)
         if result:
             CACHE["details"][cik] = result
+        else:
+            CACHE["failed"].append({"cik": cik, "name": info["name"], "reason": error})
         done += 1
         CACHE["refresh_progress"] = int((done / total) * 100)
         
