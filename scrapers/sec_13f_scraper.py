@@ -36,6 +36,35 @@ HEADERS = {
 }
 
 # =============================================================================
+# CUSIP TO TICKER MAPPING (exported for app.py)
+# =============================================================================
+CUSIP_TO_TICKER = {
+    "037833": "AAPL",   # Apple
+    "02079K": "GOOGL",  # Alphabet Class A
+    "02079L": "GOOG",   # Alphabet Class C
+    "594918": "MSFT",   # Microsoft
+    "023135": "AMZN",   # Amazon
+    "30303M": "META",   # Meta Platforms
+    "67066G": "NVDA",   # NVIDIA
+    "88160R": "TSLA",   # Tesla
+    "084670": "BRK.B",  # Berkshire Hathaway
+    "060505": "BAC",    # Bank of America
+    "46625H": "JPM",    # JPMorgan
+    "92826C": "V",      # Visa
+    "478160": "JNJ",    # Johnson & Johnson
+    "931142": "WMT",    # Walmart
+    "742718": "PG",     # Procter & Gamble
+    "88579Y": "MA",     # Mastercard
+    "172967": "C",      # Citigroup
+    "254687": "DIS",    # Disney
+    "459200": "IBM",    # IBM
+    "713448": "PEP",    # PepsiCo
+    "191216": "KO",     # Coca-Cola
+    "166764": "CVX",    # Chevron
+    "30231G": "XOM",    # Exxon Mobil
+}
+
+# =============================================================================
 # COMPLETE LIST OF 77 SUPERINVESTORS WITH VERIFIED CIK NUMBERS
 # All CIKs verified against SEC EDGAR on 2026-01-31
 # =============================================================================
