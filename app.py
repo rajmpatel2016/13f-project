@@ -124,15 +124,16 @@ def scrape_one(cik: str, info: dict):
         xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
         
         holdings = []
-        for table in re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL):
-            cm = re.search(r'<cusip>([^<]+)</cusip>', table)
+        # Handle XML namespaces (ns1:infoTable, etc.)
+        for table in re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL | re.IGNORECASE):
+            cm = re.search(r'<(?:\w+:)?cusip[^>]*>([^<]+)</(?:\w+:)?cusip>', table, re.IGNORECASE)
             if not cm:
                 continue
             cusip = cm.group(1)
-            nm = re.search(r'<nameOfIssuer>([^<]+)</nameOfIssuer>', table)
-            vm = re.search(r'<value>([^<]+)</value>', table)
-            sm = re.search(r'<sshPrnamt>([^<]+)</sshPrnamt>', table)
-            pm = re.search(r'<putCall>([^<]+)</putCall>', table)
+            nm = re.search(r'<(?:\w+:)?nameOfIssuer[^>]*>([^<]+)</(?:\w+:)?nameOfIssuer>', table, re.IGNORECASE)
+            vm = re.search(r'<(?:\w+:)?value[^>]*>([^<]+)</(?:\w+:)?value>', table, re.IGNORECASE)
+            sm = re.search(r'<(?:\w+:)?sshPrnamt[^>]*>([^<]+)</(?:\w+:)?sshPrnamt>', table, re.IGNORECASE)
+            pm = re.search(r'<(?:\w+:)?putCall[^>]*>([^<]+)</(?:\w+:)?putCall>', table, re.IGNORECASE)
             
             name = nm.group(1) if nm else ""
             if pm:
