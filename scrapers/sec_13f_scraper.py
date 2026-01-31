@@ -299,42 +299,22 @@ SUPERINVESTORS = {
         "firm": "Maverick Capital Ltd",
         "cik": "934639"
     },
-    # Mairs & Power
-    "842399": {
-        "name": "Mairs & Power",
-        "firm": "Mairs and Power Inc",
-        "cik": "842399"
-    },
+
     # Mason Hawkins - Southeastern Asset Management
     "807985": {
         "name": "Mason Hawkins",
         "firm": "Southeastern Asset Management Inc",
         "cik": "807985"
     },
-    # Meridian Contrarian Fund - through First Eagle
-    "933789": {
-        "name": "Meridian Contrarian Fund",
-        "firm": "Meridian Fund Inc",
-        "cik": "933789"
-    },
-    # Prem Watsa - Fairfax Financial
-    "1442236": {
-        "name": "Prem Watsa",
-        "firm": "Fairfax Financial Holdings Ltd",
-        "cik": "1442236"
-    },
+
+
     # Richard Pzena - Pzena Investment Management (CIK verified via SEC 13F filings)
     "1027796": {
         "name": "Richard Pzena",
         "firm": "Pzena Investment Management LLC",
         "cik": "1027796"
     },
-    # Robert Olstein - Olstein Capital Management
-    "1092031": {
-        "name": "Robert Olstein",
-        "firm": "Olstein Capital Management LP",
-        "cik": "1092031"
-    },
+
     # Ruane Cunniff & Goldfarb (CIK verified via SEC 13F filings)
     "728014": {
         "name": "Ruane Cunniff",
@@ -352,12 +332,7 @@ SUPERINVESTORS = {
         "firm": "Causeway Capital Management LLC",
         "cik": "1165797"
     },
-    # Steven Romick - First Pacific Advisors (FPA)
-    "1111665": {
-        "name": "Steven Romick",
-        "firm": "First Pacific Advisors LP",
-        "cik": "1111665"
-    },
+
     # Third Avenue Management
     "1099281": {
         "name": "Third Avenue Management",
@@ -370,12 +345,7 @@ SUPERINVESTORS = {
         "firm": "Gardner Russo & Quinn LLC",
         "cik": "860643"
     },
-    # Guy Spier - Aquamarine Capital
-    "1709314": {
-        "name": "Guy Spier",
-        "firm": "Aquamarine Capital Management Ltd",
-        "cik": "1709314"
-    },
+
     # Bill & Melinda Gates Foundation Trust
     "1166559": {
         "name": "Bill & Melinda Gates Foundation",
@@ -394,17 +364,12 @@ SUPERINVESTORS = {
         "firm": "Oakcliff Capital Partners LP",
         "cik": "1657335"
     },
-    # Charles Bobrinskoy - Ariel Investments
-    "798365": {
-        "name": "Charles Bobrinskoy",
-        "firm": "Ariel Investments LLC",
-        "cik": "798365"
-    },
-    # Christopher Bloomstran - Semper Augustus
-    "1293803": {
+
+    # Christopher Bloomstran - Semper Augustus (CIK verified via SEC 13F filings)
+    "1115373": {
         "name": "Christopher Bloomstran",
         "firm": "Semper Augustus Investments Group LLC",
-        "cik": "1293803"
+        "cik": "1115373"
     },
     
     # =========================================================================
@@ -417,11 +382,11 @@ SUPERINVESTORS = {
         "firm": "CAS Investment Partners LLC",
         "cik": "1697591"
     },
-    # David Abrams - Abrams Capital
-    "1165407": {
+    # David Abrams - Abrams Capital (CIK verified via SEC 13F filings)
+    "1358706": {
         "name": "David Abrams",
         "firm": "Abrams Capital Management LP",
-        "cik": "1165407"
+        "cik": "1358706"
     },
     # David Katz - Matrix Asset Advisors
     "1016287": {
@@ -429,11 +394,11 @@ SUPERINVESTORS = {
         "firm": "Matrix Asset Advisors Inc",
         "cik": "1016287"
     },
-    # Dennis Hong - ShawSpring Partners
-    "1727664": {
+    # Dennis Hong - ShawSpring Partners (CIK verified via SEC 13F filings)
+    "1766908": {
         "name": "Dennis Hong",
         "firm": "ShawSpring Partners LLC",
-        "cik": "1727664"
+        "cik": "1766908"
     },
     # Glenn Welling - Engaged Capital
     "1559771": {
@@ -447,12 +412,7 @@ SUPERINVESTORS = {
         "firm": "Conifer Management LLC",
         "cik": "1773994"
     },
-    # Hillman Value Fund - ALPS Series Trust
-    "1558107": {
-        "name": "Hillman Value Fund",
-        "firm": "ALPS Series Trust",
-        "cik": "1558107"
-    },
+
     # John Armitage - Egerton Capital
     "1581811": {
         "name": "John Armitage",
@@ -500,12 +460,7 @@ SUPERINVESTORS = {
         "firm": "Atlantic Investment Management Inc",
         "cik": "1063296"
     },
-    # FPA Queens Road - Investment Managers Series Trust III
-    "924727": {
-        "name": "FPA Queens Road",
-        "firm": "Investment Managers Series Trust III",
-        "cik": "924727"
-    },
+
     # Mohnish Pabrai - Dalal Street LLC
     "1549575": {
         "name": "Mohnish Pabrai",
@@ -523,11 +478,11 @@ SUPERINVESTORS = {
         "firm": "Yacktman Asset Management LP",
         "cik": "905567"
     },
-    # First Eagle Investment Management
-    "1436879": {
+    # First Eagle Investment Management (CIK verified via SEC 13F filings)
+    "1325447": {
         "name": "First Eagle Investment Management",
         "firm": "First Eagle Investment Management LLC",
-        "cik": "1436879"
+        "cik": "1325447"
     },
     # Larry Robbins - Glenview Capital
     "1138995": {
@@ -541,12 +496,7 @@ SUPERINVESTORS = {
         "firm": "Leucadia National Corporation",
         "cik": "96223"
     },
-    # Eddie Lampert - ESL Investments (CIK verified via SEC 13F filings)
-    "1126396": {
-        "name": "Eddie Lampert",
-        "firm": "ESL Investments Inc",
-        "cik": "1126396"
-    },
+
     # Bruce Berkowitz - Fairholme Capital
     "1056831": {
         "name": "Bruce Berkowitz",
