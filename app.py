@@ -1,5 +1,7 @@
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import json
 import os
 import re
@@ -114,6 +116,12 @@ load_cache()
 
 @app.get("/")
 def root():
+    """Serve the frontend"""
+    return FileResponse("frontend/index.html")
+
+@app.get("/health")
+def health():
+    """Health check endpoint"""
     return {
         "status": "healthy",
         "last_updated": CACHE.get("last_updated"),
