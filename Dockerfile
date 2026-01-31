@@ -23,4 +23,4 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Default command (overridden by docker-compose)
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api.main_db:app", "--host", "0.0.0.0", "--port", "8000"]
