@@ -124,7 +124,7 @@ def scrape_one(cik: str, info: dict):
         xml = requests.get(xml_url, headers=HEADERS, timeout=8).text
         
         holdings = []
-        for table in re.findall(r'<infoTable>(.*?)</infoTable>', xml, re.DOTALL):
+        for table in re.findall(r'<(?:\w+:)?infoTable[^>]*>(.*?)</(?:\w+:)?infoTable>', xml, re.DOTALL):
             cm = re.search(r'<cusip>([^<]+)</cusip>', table)
             if not cm:
                 continue
